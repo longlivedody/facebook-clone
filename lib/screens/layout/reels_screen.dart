@@ -9,7 +9,7 @@ class ReelsScreen extends StatefulWidget {
   const ReelsScreen({super.key, required this.videos});
 
   @override
-  _ReelsScreenState createState() => _ReelsScreenState();
+  ReelsScreenState createState() => ReelsScreenState();
 }
 
 String _formatDuration(Duration duration) {
@@ -30,7 +30,7 @@ Map<int, VideoPlayerController> _videoControllers = {};
 Map<int, Future<void>> _initializeVideoPlayerFutures = {};
 int _currentPage = 0;
 
-class _ReelsScreenState extends State<ReelsScreen> {
+class ReelsScreenState extends State<ReelsScreen> {
   // ... (rest of your existing state variables)
 
   // No need for new state variables just for displaying duration/position
