@@ -1,7 +1,6 @@
-import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 
-import '../Auth/login_screen.dart';
+import '../../widgets/custom_text.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,26 +10,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    _navigateToHome();
-    super.initState();
-  }
-
-  Future<void> _navigateToHome() {
-    return Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) {
-              return const LoginScreen();
-            },
-          ),
-        );
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return const Scaffold(

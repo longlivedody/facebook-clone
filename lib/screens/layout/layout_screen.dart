@@ -4,10 +4,18 @@ import 'package:facebook_clone/screens/reels/reels_screen.dart';
 import 'package:facebook_clone/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/auth_service.dart';
 import '../posts/posts_screen.dart';
 
 class LayoutScreen extends StatelessWidget {
-  const LayoutScreen({super.key});
+  final User user;
+  final AuthService authService;
+
+  const LayoutScreen({
+    super.key,
+    required this.user,
+    required this.authService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +55,7 @@ class LayoutScreen extends StatelessWidget {
                       // Content for Tab 3 (notifications)
                       Center(child: Text('notifications Content')),
                       // Content for Tab 4 (Alerts)
-                      MenuScreen(),
+                      MenuScreen(user: user, authService: authService),
                     ],
                   ),
                 ),
