@@ -1,4 +1,5 @@
 import 'package:facebook_clone/models/video_model.dart';
+import 'package:facebook_clone/screens/menu/menu_screen.dart';
 import 'package:facebook_clone/screens/reels/reels_screen.dart';
 import 'package:facebook_clone/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,7 @@ class LayoutScreen extends StatelessWidget {
                       // Content for Tab 3 (notifications)
                       Center(child: Text('notifications Content')),
                       // Content for Tab 4 (Alerts)
-                      Center(child: Text('menu Content')),
+                      MenuScreen(),
                     ],
                   ),
                 ),
