@@ -18,7 +18,7 @@ class LayoutScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
             child: Column(
               children: [
-                CustomAppbar(),
+                const CustomAppbar(),
                 const TabBar(
                   tabs: [
                     Tab(icon: Icon(Icons.home, size: 35)),
@@ -39,9 +39,9 @@ class LayoutScreen extends StatelessWidget {
                   // Important to make TabBarView fill available space
                   child: TabBarView(
                     children: [
-                      // Content for Tab 1 (Home)
+                      // Content for Tab 1 (posts)
                       PostsScreen(),
-                      // Content for Tab 2 (videos)
+                      // Content for Tab 2 (reels)
                       ReelsScreen(videos: sampleVideos),
                       // Content for Tab 3 (notifications)
                       Center(child: Text('notifications Content')),

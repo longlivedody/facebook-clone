@@ -45,7 +45,7 @@ class _PostsScreenState extends State<PostsScreen> {
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async {},
-                  child: _isLoading ? _buildShimmerList() : _buildPostsList(),
+                  child: _isLoading ? buildShimmerList() : buildPostsList(),
                 ),
               ),
             ],
@@ -55,7 +55,7 @@ class _PostsScreenState extends State<PostsScreen> {
     );
   }
 
-  Widget _buildPostsList() {
+  Widget buildPostsList() {
     if (_posts.isEmpty) {
       return const Center(
         child: Text("No posts yet. Pull to refresh!"),
@@ -82,7 +82,7 @@ class _PostsScreenState extends State<PostsScreen> {
     );
   }
 
-  Widget _buildShimmerList() {
+  Widget buildShimmerList() {
     return ListView.separated(
       separatorBuilder: (context, index) {
         return Column(
@@ -95,7 +95,7 @@ class _PostsScreenState extends State<PostsScreen> {
           ],
         );
       },
-      itemCount: 5, // Display a few shimmer items
+      itemCount: _posts.length,
       itemBuilder: (context, index) {
         return const HomeShimmerItem();
       },

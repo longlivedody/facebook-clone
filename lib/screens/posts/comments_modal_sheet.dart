@@ -27,7 +27,7 @@ void showCommentsModal({
             padding: const EdgeInsets.only(top: 12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: [
                 Center(
                   child: Container(
                     width: 100,
