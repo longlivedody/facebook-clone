@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../models/video_model.dart';
@@ -31,13 +32,6 @@ Map<int, Future<void>> _initializeVideoPlayerFutures = {};
 int _currentPage = 0;
 
 class ReelsScreenState extends State<ReelsScreen> {
-  // ... (rest of your existing state variables)
-
-  // No need for new state variables just for displaying duration/position
-  // if we read directly from controller.value in the build method.
-  // However, if you need to react to position changes for other logic,
-  // you would add listeners in _initializeAndPlay.
-
   @override
   void initState() {
     super.initState();
@@ -51,27 +45,24 @@ class ReelsScreenState extends State<ReelsScreen> {
     }
 
     if (_videoControllers.containsKey(_currentPage) && _currentPage != index) {
-      _videoControllers[_currentPage]?.removeListener(
-        _onControllerUpdate,
-      ); // Remove listener from old
+      _videoControllers[_currentPage]?.removeListener(_onControllerUpdate);
       _videoControllers[_currentPage]?.pause();
     }
 
     final videoUrl = widget.videos[index].videoUrl;
-    // Dispose existing controller for the same index if we are re-initializing
+
     _videoControllers[index]?.dispose();
 
     final controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
     _videoControllers[index] = controller;
-    // Add a listener to rebuild UI when position changes
+
     controller.addListener(_onControllerUpdate);
 
     _initializeVideoPlayerFutures[index] = controller
         .initialize()
         .then((_) {
           if (mounted) {
-            // Check if widget is still in the tree
-            setState(() {}); // Update UI to show duration, first frame etc.
+            setState(() {});
             if (_currentPage == index) {
               controller.play();
               controller.setLooping(true);
@@ -86,15 +77,11 @@ class ReelsScreenState extends State<ReelsScreen> {
         });
   }
 
-  // Listener to update UI on controller changes (like position)
   void _onControllerUpdate() {
     if (!mounted) {
       return;
     }
-    // This will trigger a rebuild if the currently active video's controller updates.
-    // We only want to rebuild if the update is for the _currentPage.
-    // A more robust way is to check which controller is updating if you have multiple listeners.
-    // For simplicity here, we just call setState.
+
     setState(() {});
   }
 
@@ -117,7 +104,7 @@ class ReelsScreenState extends State<ReelsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black, // Common for video players
+      backgroundColor: Colors.black,
       body: PageView.builder(
         controller: _pageController,
         scrollDirection: Axis.vertical,
@@ -126,14 +113,11 @@ class ReelsScreenState extends State<ReelsScreen> {
           // Pause previous video
           final previousPageIndex = _currentPage;
           _videoControllers[previousPageIndex]?.pause();
-          // It's good practice to remove listener from the controller that is no longer current
-          // if you are adding listeners selectively. However, our _onControllerUpdate is generic.
 
           setState(() {
             _currentPage = index;
           });
 
-          // Initialize and play the new current video
           if (!_videoControllers.containsKey(index) ||
               !_videoControllers[index]!.value.isInitialized) {
             _initializeAndPlay(index);
@@ -155,8 +139,7 @@ class ReelsScreenState extends State<ReelsScreen> {
                 final Duration position = controller.value.position;
 
                 return Stack(
-                  // Use Stack to overlay text on video
-                  alignment: Alignment.bottomCenter, // Align text to bottom
+                  alignment: Alignment.bottomCenter,
                   children: [
                     GestureDetector(
                       onTap: () {
@@ -165,8 +148,6 @@ class ReelsScreenState extends State<ReelsScreen> {
                         } else {
                           controller.play();
                         }
-                        // setState is called by _onControllerUpdate or can be called here too
-                        // if _onControllerUpdate is not set up for play/pause state changes.
                       },
                       child: SizedBox.expand(
                         child: FittedBox(
@@ -180,7 +161,7 @@ class ReelsScreenState extends State<ReelsScreen> {
                         ),
                       ),
                     ),
-                    // Video Progress Indicator (optional, but good for UX)
+
                     VideoProgressIndicator(
                       controller,
                       allowScrubbing: true,
@@ -191,9 +172,8 @@ class ReelsScreenState extends State<ReelsScreen> {
                         backgroundColor: Colors.transparent,
                       ),
                     ),
-                    // Display Duration and Position
                     Positioned(
-                      bottom: 40, // Adjust position as needed
+                      bottom: 40,
                       left: 16,
                       right: 16,
                       child: Row(
@@ -230,7 +210,6 @@ class ReelsScreenState extends State<ReelsScreen> {
                         ],
                       ),
                     ),
-                    // Example: Play/Pause button overlay
                     if (!controller.value.isPlaying)
                       Center(
                         child: IconButton(
@@ -247,7 +226,6 @@ class ReelsScreenState extends State<ReelsScreen> {
                             } else {
                               controller.play();
                             }
-                            // setState will be called by _onControllerUpdate
                           },
                         ),
                       ),
@@ -279,8 +257,11 @@ class ReelsScreenState extends State<ReelsScreen> {
                   ),
                 );
               } else {
-                // Show a loading indicator while the video is preparing
-                return const Center(child: CircularProgressIndicator());
+                return Shimmer.fromColors(
+                  baseColor: Colors.grey[700]!,
+                  highlightColor: Colors.grey[500]!,
+                  child: Container(color: Colors.black),
+                );
               }
             },
           );

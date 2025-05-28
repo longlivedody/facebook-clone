@@ -1,7 +1,5 @@
 // In your models/user_data_model.dart
 
-import 'package:flutter/material.dart';
-
 import 'comments_model.dart'; // Make sure this import is correct
 
 class PostDataModel {
@@ -10,7 +8,7 @@ class PostDataModel {
   final String profileImageUrl;
   final String postText;
   final String postImageUrl;
-  final TimeOfDay postTime;
+  final String postTime;
   final int likesCount;
 
   final int sharesCount;
@@ -40,7 +38,7 @@ class PostDataModel {
       postImageUrl: "https://picsum.photos/seed/post1/600/400",
       likesCount: 1520,
       sharesCount: 35,
-      postTime: TimeOfDay.now(),
+      postTime: '5:39 PM',
       comments: [CommentsModel.comments[0], CommentsModel.comments[2]],
     ),
     PostDataModel(
@@ -51,7 +49,7 @@ class PostDataModel {
       postImageUrl: "https://picsum.photos/seed/post2/600/400",
       likesCount: 2100,
       sharesCount: 50,
-      postTime: TimeOfDay.now(),
+      postTime: '2:21 PM',
       comments: [
         CommentsModel.comments[1],
         CommentsModel.comments[3],
@@ -67,7 +65,7 @@ class PostDataModel {
       postImageUrl: "https://picsum.photos/seed/post3/600/400",
       likesCount: 950,
       sharesCount: 15,
-      postTime: TimeOfDay.now(),
+      postTime: '12:21 AM',
       comments: [],
     ),
     PostDataModel(
@@ -78,7 +76,7 @@ class PostDataModel {
       postImageUrl: "https://picsum.photos/seed/post4/600/400",
       likesCount: 1800,
       sharesCount: 40,
-      postTime: TimeOfDay.now(),
+      postTime: '2:21 PM',
       comments: [
         CommentsModel(
           userImgUrl:

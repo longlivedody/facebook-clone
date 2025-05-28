@@ -1,9 +1,8 @@
 import 'package:facebook_clone/models/video_model.dart';
-import 'package:facebook_clone/screens/layout/reels_screen.dart';
-import 'package:facebook_clone/widgets/custom_text.dart';
+import 'package:facebook_clone/screens/reels/reels_screen.dart';
+import 'package:facebook_clone/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
-import '../../widgets/custom_icon_button.dart';
 import '../home/home_screen.dart';
 
 class LayoutScreen extends StatelessWidget {
@@ -19,34 +18,7 @@ class LayoutScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    CustomText(
-                      'facebook',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Spacer(),
-                    CustomIconButton(
-                      onPressed: () {},
-                      iconData: Icons.add_circle,
-                      iconSize: 30,
-                    ),
-                    CustomIconButton(
-                      onPressed: () {},
-                      iconData: Icons.search,
-                      iconSize: 30,
-                    ),
-                    CustomIconButton(
-                      onPressed: () {},
-                      iconData: Icons.message,
-                      iconSize: 30,
-                    ),
-                  ],
-                ),
-
+                CustomAppbar(),
                 const TabBar(
                   tabs: [
                     Tab(icon: Icon(Icons.home, size: 35)),
