@@ -3,7 +3,7 @@ import 'package:facebook_clone/screens/reels/reels_screen.dart';
 import 'package:facebook_clone/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
-import '../home/home_screen.dart';
+import '../posts/posts_screen.dart';
 
 class LayoutScreen extends StatelessWidget {
   const LayoutScreen({super.key});
@@ -40,7 +40,7 @@ class LayoutScreen extends StatelessWidget {
                   child: TabBarView(
                     children: [
                       // Content for Tab 1 (Home)
-                      HomeScreen(),
+                      PostsScreen(),
                       // Content for Tab 2 (videos)
                       ReelsScreen(videos: sampleVideos),
                       // Content for Tab 3 (notifications)

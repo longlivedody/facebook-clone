@@ -1,18 +1,18 @@
 import 'package:facebook_clone/models/user_data_model.dart';
-import 'package:facebook_clone/screens/home/home_item.dart';
 import 'package:flutter/material.dart';
 
 // You'll create this file next
-import 'home_shimmer_item.dart';
+import 'post_item.dart';
+import 'post_shimmer_item.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class PostsScreen extends StatefulWidget {
+  const PostsScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<PostsScreen> createState() => _PostsScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _PostsScreenState extends State<PostsScreen> {
   List<PostDataModel> _posts = []; // Initialize as empty
   bool _isLoading = true; // Start in loading state
 
