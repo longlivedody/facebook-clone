@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
-  final String labelText;
+  final String? labelText;
   final String? hintText;
   final IconData? prefixIcon;
   final IconData? suffixIcon;
@@ -28,7 +28,7 @@ class CustomTextField extends StatelessWidget {
   const CustomTextField({
     super.key,
     required this.controller,
-    required this.labelText,
+    this.labelText,
     this.hintText,
     this.prefixIcon,
     this.suffixIcon,
@@ -59,13 +59,10 @@ class CustomTextField extends StatelessWidget {
 
     final InputDecoration componentDefaultDecoration = InputDecoration(
       labelText: labelText,
-
       hintText: hintText,
-
       border: const OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
-
       prefixIconColor: WidgetStateColor.resolveWith((states) {
         if (states.contains(WidgetState.focused)) {
           return colorScheme.primary;
@@ -92,9 +89,7 @@ class CustomTextField extends StatelessWidget {
             .applyDefaults(themeInputDecorationTheme)
             .copyWith(
               labelText: labelText,
-
               hintText: hintText,
-
               prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
               suffixIcon: suffixIcon != null
                   ? IconButton(
@@ -105,8 +100,8 @@ class CustomTextField extends StatelessWidget {
             );
 
     final TextStyle? themeTextStyle = Theme.of(context).textTheme.titleMedium;
-    final TextStyle effectiveTextStyle = (themeTextStyle ?? const TextStyle())
-        .merge(style);
+    final TextStyle effectiveTextStyle =
+        (themeTextStyle ?? const TextStyle()).merge(style);
 
     return TextFormField(
       controller: controller,

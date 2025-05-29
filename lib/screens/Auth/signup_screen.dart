@@ -120,7 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                CustomText(
+                const CustomText(
                   'Create your Account',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
@@ -132,7 +132,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   prefixIcon: Icons.person_outline,
                   textInputAction: TextInputAction.next,
                 ),
-
                 const SizedBox(height: 16),
                 CustomTextField(
                   controller: _emailController,
@@ -150,7 +149,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
                 CustomTextField(
                   controller: _passwordController,
@@ -168,7 +166,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                   textInputAction: TextInputAction.next,
                 ),
-
                 const SizedBox(height: 16),
                 CustomTextField(
                   prefixIcon: Icons.lock_outline,
@@ -187,7 +184,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _isLoading ? null : _performSignUp(),
                 ),
-
                 const SizedBox(height: 24),
                 if (_errorMessage != null)
                   Padding(

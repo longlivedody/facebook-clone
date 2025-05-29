@@ -4,9 +4,20 @@ import 'package:flutter/material.dart';
 import '../../models/post_data_model.dart';
 import 'post_item.dart';
 import 'post_shimmer_item.dart';
+import 'create_post_screen.dart';
+import 'package:facebook_clone/services/auth_service.dart';
+import 'package:facebook_clone/services/post_service.dart';
+import 'package:facebook_clone/widgets/custom_text.dart';
 
 class PostsScreen extends StatefulWidget {
-  const PostsScreen({super.key});
+  final User user;
+  final AuthService authService;
+
+  const PostsScreen({
+    super.key,
+    required this.user,
+    required this.authService,
+  });
 
   @override
   State<PostsScreen> createState() => _PostsScreenState();
@@ -14,25 +25,59 @@ class PostsScreen extends StatefulWidget {
 
 class _PostsScreenState extends State<PostsScreen>
     with AutomaticKeepAliveClientMixin {
-  List<PostDataModel> _posts = []; // Initialize as empty
-  bool _isLoading = true; // Start in loading state
+  final PostService _postService = PostService();
+  bool _isLoading = true;
+  String? _error;
+  bool _isConnected = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchPosts();
+    _initializePosts();
   }
 
-  Future<void> _fetchPosts() async {
-    // Simulate network delay
-    _posts = PostDataModel.posts; // Load your static posts for now
+  Future<void> _initializePosts() async {
+    try {
+      // Check Firestore connection
+      _isConnected = await _postService.checkConnection();
 
-    await Future.delayed(const Duration(seconds: 2));
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          if (!_isConnected) {
+            _error =
+                'Unable to connect to the server. Please check your internet connection.';
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _error = 'Failed to initialize: $e';
+        });
+      }
+    }
+  }
 
-    // In a real app, replace this with your actual data fetching logic
+  void _navigateToCreatePost() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreatePostScreen(
+          user: widget.user,
+          postService: _postService,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _refreshPosts() async {
     setState(() {
-      _isLoading = false;
+      _error = null;
+      _isLoading = true;
     });
+    await _initializePosts();
   }
 
   @override
@@ -46,9 +91,7 @@ class _PostsScreenState extends State<PostsScreen>
             children: [
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () async {
-                    await _fetchPosts();
-                  },
+                  onRefresh: _refreshPosts,
                   child: _isLoading ? buildShimmerList() : buildPostsList(),
                 ),
               ),
@@ -56,32 +99,92 @@ class _PostsScreenState extends State<PostsScreen>
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToCreatePost,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
   Widget buildPostsList() {
-    if (_posts.isEmpty) {
-      return const Center(
-        child: Text("No posts yet. Pull to refresh!"),
-      ); // Or some other empty state
-    }
-    return ListView.separated(
-      separatorBuilder: (context, index) {
-        return Column(
+    if (!_isConnected) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 10),
-            Divider(),
-            const SizedBox(height: 5),
+            const Icon(Icons.cloud_off, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            CustomText(
+              _error ?? 'No connection',
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _refreshPosts,
+              child: const CustomText('Try Again'),
+            ),
           ],
+        ),
+      );
+    }
+
+    return StreamBuilder<List<PostDataModel>>(
+      stream: _postService.getPosts(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                CustomText(
+                  'Error: ${snapshot.error}',
+                  style: const TextStyle(color: Colors.red),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _refreshPosts,
+                  child: const CustomText('Try Again'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        final posts = snapshot.data!;
+
+        if (posts.isEmpty) {
+          return const Center(
+            child: CustomText('No posts yet. Be the first to post!'),
+          );
+        }
+
+        return ListView.separated(
+          separatorBuilder: (context, index) {
+            return const Column(
+              children: [
+                SizedBox(height: 10),
+                Divider(),
+                SizedBox(height: 5),
+              ],
+            );
+          },
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          itemCount: posts.length,
+          itemBuilder: (context, index) {
+            final post = posts[index];
+            return PostItem(postData: post);
+          },
         );
-      },
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      itemCount: _posts.length,
-      itemBuilder: (context, index) {
-        final post = _posts[index];
-        return PostItem(postData: post);
       },
     );
   }
@@ -94,12 +197,12 @@ class _PostsScreenState extends State<PostsScreen>
             const SizedBox(height: 10),
             Divider(
               color: Theme.of(context).dividerColor.withAlpha(50),
-            ), // Lighter divider for shimmer
+            ),
             const SizedBox(height: 10),
           ],
         );
       },
-      itemCount: _posts.length,
+      itemCount: 3,
       itemBuilder: (context, index) {
         return const PostShimmerItem();
       },
@@ -107,6 +210,5 @@ class _PostsScreenState extends State<PostsScreen>
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }

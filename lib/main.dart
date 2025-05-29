@@ -1,6 +1,7 @@
 import 'package:facebook_clone/consts/theme.dart';
 import 'package:facebook_clone/screens/layout/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,8 +9,28 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint('firebase initialized');
+
+  try {
+    // Initialize Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    // Configure Firestore
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+      sslEnabled: true,
+    );
+
+    // Test Firestore connection
+    await FirebaseFirestore.instance.collection('test').limit(1).get();
+    debugPrint('Firebase and Firestore initialized successfully');
+  } catch (e) {
+    debugPrint('Failed to initialize Firebase: $e');
+    // You might want to show a user-friendly error message here
+    // or handle the error in a way that makes sense for your app
+  }
 
   runApp(const MyApp());
 }
@@ -36,21 +57,14 @@ class MyAppState extends State<MyApp> {
 
   Future<void> _loadThemePreference() async {
     final prefs = await SharedPreferences.getInstance();
-
     String savedTheme = prefs.getString(_themePreferenceKey) ?? 'light';
-
     setState(() {
-      if (savedTheme == 'dark') {
-        _themeMode = ThemeMode.dark;
-      } else {
-        _themeMode = ThemeMode.light;
-      }
+      _themeMode = savedTheme == 'dark' ? ThemeMode.dark : ThemeMode.light;
     });
   }
 
   Future<void> _saveThemePreference(ThemeMode themeMode) async {
     final prefs = await SharedPreferences.getInstance();
-
     await prefs.setString(
       _themePreferenceKey,
       themeMode.toString().split('.').last,
@@ -68,10 +82,10 @@ class MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      themeMode: _themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: SplashScreen(),
+      themeMode: _themeMode,
+      home: const SplashScreen(),
     );
   }
 }

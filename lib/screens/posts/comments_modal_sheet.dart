@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../models/comments_model.dart';
 import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
 
 void showCommentsModal({
   required BuildContext context,
   required List<CommentsModel> comments,
   required TextEditingController controller,
+  required Function(String) onCommentSent,
 }) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
     ),
@@ -86,17 +85,17 @@ void showCommentsModal({
                                 vertical: 8.0,
                               ),
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   CircleAvatar(
                                     radius: 25,
                                     backgroundColor: Colors.grey[300],
                                     backgroundImage:
                                         (currentComment.userImgUrl.isNotEmpty)
-                                        ? NetworkImage(
-                                            currentComment.userImgUrl,
-                                          )
-                                        : null,
+                                            ? NetworkImage(
+                                                currentComment.userImgUrl,
+                                              )
+                                            : null,
                                     child: (currentComment.userImgUrl.isEmpty)
                                         ? const Icon(
                                             Icons.person,
@@ -115,13 +114,21 @@ void showCommentsModal({
                                           currentComment.username,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            fontSize: 16,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         CustomText(
                                           currentComment.comment,
                                           style: const TextStyle(fontSize: 14),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        CustomText(
+                                          _getTimeAgo(currentComment.timestamp),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -135,22 +142,38 @@ void showCommentsModal({
 
                 Padding(
                   padding: EdgeInsets.only(
-                    bottom:
-                        MediaQuery.of(modalContext).viewInsets.bottom +
+                    bottom: MediaQuery.of(modalContext).viewInsets.bottom +
                         10, // Adjust for keyboard and some spacing
                     left: 16.0,
                     right: 16.0,
                     top: 8.0, // Spacing above the text field
                   ),
-                  child: Material(
-                    // Wrap TextField in Material for theming if needed
-                    elevation: 2.0, // Optional: add a slight shadow
-                    borderRadius: BorderRadius.circular(25.0),
-                    child: CustomTextField(
-                      controller: controller,
-                      labelText: 'add comment',
-                      suffixIcon: Icons.send,
+                  child: TextFormField(
+                    controller: controller,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      hintText: 'Add comment',
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.send),
+                        onPressed: () {
+                          if (controller.text.trim().isNotEmpty) {
+                            onCommentSent(controller.text.trim());
+                            controller.clear();
+                          }
+                        },
+                      ),
                     ),
+                    onFieldSubmitted: (value) {
+                      if (value.trim().isNotEmpty) {
+                        onCommentSent(value.trim());
+                        controller.clear();
+                      }
+                    },
                   ),
                 ),
               ],
@@ -160,4 +183,23 @@ void showCommentsModal({
       );
     },
   );
+}
+
+String _getTimeAgo(DateTime dateTime) {
+  final now = DateTime.now();
+  final difference = now.difference(dateTime);
+
+  if (difference.inDays > 365) {
+    return '${(difference.inDays / 365).floor()}y';
+  } else if (difference.inDays > 30) {
+    return '${(difference.inDays / 30).floor()}mo';
+  } else if (difference.inDays > 0) {
+    return '${difference.inDays}d';
+  } else if (difference.inHours > 0) {
+    return '${difference.inHours}h';
+  } else if (difference.inMinutes > 0) {
+    return '${difference.inMinutes}m';
+  } else {
+    return 'now';
+  }
 }

@@ -5,15 +5,15 @@ class AppTheme {
 
   static final Color _lightPrimaryColor = Colors.blue.shade700;
   static final Color _lightPrimaryVariantColor = Colors.blue.shade800;
-  static final Color _lightOnPrimaryColor = Colors.white;
+  static const Color _lightOnPrimaryColor = Colors.white;
   static final Color _lightSecondaryColor = Colors.lightBlue.shade300;
-  static final Color _lightOnSecondaryColor = Colors.black;
+  static const Color _lightOnSecondaryColor = Colors.black;
 
   static final Color _darkPrimaryColor = Colors.blue.shade300;
   static final Color _darkPrimaryVariantColor = Colors.blue.shade700;
-  static final Color _darkOnPrimaryColor = Colors.black;
+  static const Color _darkOnPrimaryColor = Colors.black;
   static final Color _darkSecondaryColor = Colors.blue.shade700;
-  static final Color _darkOnSecondaryColor = Colors.white;
+  static const Color _darkOnSecondaryColor = Colors.white;
 
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -27,7 +27,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(8.0),
         borderSide: BorderSide(color: _lightPrimaryColor, width: 2.0),
       ),
-      labelStyle: TextStyle(color: _lightOnSecondaryColor),
+      labelStyle: const TextStyle(color: _lightOnSecondaryColor),
       hintStyle: TextStyle(color: Colors.grey.shade500),
       // ... other input decoration defaults
     ),
@@ -35,9 +35,9 @@ class AppTheme {
     dividerTheme: DividerThemeData(color: Colors.grey[400], thickness: 2.0),
     appBarTheme: AppBarTheme(
       color: _lightPrimaryColor,
-      iconTheme: IconThemeData(color: _lightOnPrimaryColor),
-      actionsIconTheme: IconThemeData(color: _lightOnPrimaryColor),
-      titleTextStyle: TextStyle(
+      iconTheme: const IconThemeData(color: _lightOnPrimaryColor),
+      actionsIconTheme: const IconThemeData(color: _lightOnPrimaryColor),
+      titleTextStyle: const TextStyle(
         color: _lightOnPrimaryColor,
         fontSize: 20,
         fontWeight: FontWeight.w500,
@@ -73,10 +73,9 @@ class AppTheme {
     scaffoldBackgroundColor: Colors.grey.shade900,
     appBarTheme: AppBarTheme(
       color: _darkPrimaryColor,
-      iconTheme: IconThemeData(color: _darkOnPrimaryColor),
-      actionsIconTheme: IconThemeData(color: Colors.white),
-
-      titleTextStyle: TextStyle(
+      iconTheme: const IconThemeData(color: _darkOnPrimaryColor),
+      actionsIconTheme: const IconThemeData(color: Colors.white),
+      titleTextStyle: const TextStyle(
         color: _darkOnPrimaryColor,
         fontSize: 20,
         fontWeight: FontWeight.w500,
@@ -94,7 +93,7 @@ class AppTheme {
       error: Colors.redAccent,
       onError: Colors.black,
     ),
-    dividerTheme: DividerThemeData(color: Colors.black, thickness: 2.0),
+    dividerTheme: const DividerThemeData(color: Colors.black, thickness: 2.0),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8.0),
@@ -104,7 +103,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(8.0),
         borderSide: BorderSide(color: _darkPrimaryColor, width: 2.0),
       ),
-      labelStyle: TextStyle(color: Colors.white),
+      labelStyle: const TextStyle(color: Colors.white),
       hintStyle: TextStyle(color: Colors.grey.shade700),
       filled: true,
       fillColor: Colors.grey.shade800.withAlpha(50),

@@ -64,6 +64,7 @@ class AuthService {
     required String email,
     required String password,
     String? displayName, // Optional: for setting display name during sign up
+    // Optional: for setting profile image during sign up
   }) async {
     try {
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -73,9 +74,11 @@ class AuthService {
       if (userCredential.user != null) {
         if (displayName != null && displayName.isNotEmpty) {
           await userCredential.user!.updateDisplayName(displayName);
-          // Reload the user to get the updated display name
-          await userCredential.user!.reload();
         }
+
+        // Reload the user to get the updated profile
+        await userCredential.user!.reload();
+
         // It's good practice to re-fetch the user or use the one from userCredential
         // to ensure all properties (like an updated displayName) are fresh.
         final freshFirebaseUser = _firebaseAuth.currentUser;
@@ -88,9 +91,7 @@ class AuthService {
       debugPrint(
         "Firebase Auth Exception during sign up: ${e.message} (Code: ${e.code})",
       );
-      // You can throw a custom exception or return null/handle specific error codes
-      // e.g., if (e.code == 'email-already-in-use') { ... }
-      rethrow; // Rethrow to be caught by the UI layer
+      rethrow;
     } catch (e) {
       debugPrint("An unexpected error occurred during sign up: $e");
       rethrow;

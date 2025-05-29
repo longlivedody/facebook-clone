@@ -64,7 +64,7 @@ class CustomButton extends StatelessWidget {
         return 4.0; // Default elevation
       }),
       // Ensure the button itself can expand
-      minimumSize: WidgetStatePropertyAll<Size>(Size(double.infinity, 0)),
+      minimumSize: const WidgetStatePropertyAll<Size>(Size(double.infinity, 0)),
     );
 
     final ButtonStyle effectiveStyle = (themeButtonStyle ?? const ButtonStyle())

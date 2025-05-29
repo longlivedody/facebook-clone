@@ -10,11 +10,11 @@ class CustomAppbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CustomText(
+        const CustomText(
           'facebook',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        Spacer(),
+        const Spacer(),
         CustomIconButton(
           onPressed: () {},
           iconData: Icons.add_circle,

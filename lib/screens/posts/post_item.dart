@@ -1,14 +1,17 @@
 import 'package:facebook_clone/models/post_data_model.dart';
+import 'package:facebook_clone/services/comment_service.dart';
 import 'package:flutter/material.dart';
-import 'package:transparent_image/transparent_image.dart';
+import 'package:facebook_clone/services/auth_service.dart';
 
+import '../../utils/image_utils.dart';
 import '../../widgets/custom_text.dart';
 import 'comments_modal_sheet.dart';
 
 class PostItem extends StatelessWidget {
   final PostDataModel postData;
+  final CommentService _commentService = CommentService();
 
-  const PostItem({super.key, required this.postData});
+  PostItem({super.key, required this.postData});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,7 @@ class PostItem extends StatelessWidget {
         userSection(
           username: postData.username,
           profileImageUrl: postData.profileImageUrl,
-          postTime: postData.postTime.toString(),
+          postTime: _getTimeAgo(postData.postTime.toDate()),
         ),
         const SizedBox(height: 10),
         // post content
@@ -30,12 +33,19 @@ class PostItem extends StatelessWidget {
         const SizedBox(height: 10),
         // post image
         if (postData.postImageUrl.isNotEmpty)
-          FadeInImage.memoryNetwork(
-            placeholder: kTransparentImage,
-            image: postData.postImageUrl,
+          Image(
+            image: ImageUtils.getImageProvider(postData.postImageUrl),
             width: double.infinity,
             fit: BoxFit.fill,
             height: estimatedImageHeight,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: double.infinity,
+                height: estimatedImageHeight,
+                color: Colors.grey[300],
+                child: const Icon(Icons.error_outline, size: 50),
+              );
+            },
           ),
         const SizedBox(height: 10),
         // likes , comment and shares
@@ -45,6 +55,28 @@ class PostItem extends StatelessWidget {
               context: context,
               comments: postData.comments,
               controller: controller,
+              onCommentSent: (String comment) async {
+                try {
+                  final user = AuthService().currentUser;
+                  if (user != null) {
+                    await _commentService.addComment(
+                      postId: postData.postId,
+                      commentText: comment,
+                      user: user,
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text('Failed to send comment: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
             );
           },
           child: reactsCommentsShares(
@@ -59,6 +91,25 @@ class PostItem extends StatelessWidget {
       ],
     );
   }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 365) {
+      return '${(difference.inDays / 365).floor()}y';
+    } else if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()}mo';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays}d';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m';
+    } else {
+      return 'now';
+    }
+  }
 }
 
 Widget userSection({
@@ -68,16 +119,29 @@ Widget userSection({
 }) {
   return Row(
     children: [
-      CircleAvatar(radius: 27, backgroundImage: NetworkImage(profileImageUrl)),
+      profileImageUrl != ''
+          ? CircleAvatar(
+              radius: 27,
+              backgroundImage: ImageUtils.getImageProvider(profileImageUrl),
+              onBackgroundImageError: (exception, stackTrace) {
+                // Handle error if needed
+              },
+            )
+          : CircleAvatar(
+              radius: 27,
+              child: Icon(
+                Icons.person,
+              ),
+            ),
       const SizedBox(width: 8),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomText(
             username,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          CustomText(postTime, style: TextStyle(fontSize: 12)),
+          CustomText(postTime, style: const TextStyle(fontSize: 12)),
         ],
       ),
     ],
@@ -94,17 +158,18 @@ Widget reactsCommentsShares({
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        CustomText('$likesCount likes', style: TextStyle(fontSize: 12)),
-        CustomText('$commentsCount comments', style: TextStyle(fontSize: 12)),
-        CustomText('$sharesCount shares', style: TextStyle(fontSize: 12)),
+        CustomText('$likesCount likes', style: const TextStyle(fontSize: 12)),
+        CustomText('$commentsCount comments',
+            style: const TextStyle(fontSize: 12)),
+        CustomText('$sharesCount shares', style: const TextStyle(fontSize: 12)),
       ],
     ),
   );
 }
 
 Widget actionsSection() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+  return const Padding(
+    padding: EdgeInsets.symmetric(horizontal: 25.0),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

@@ -49,11 +49,11 @@ class LayoutScreen extends StatelessWidget {
                   child: TabBarView(
                     children: [
                       // Content for Tab 1 (posts)
-                      PostsScreen(),
+                      PostsScreen(user: user, authService: authService),
                       // Content for Tab 2 (reels)
                       ReelsScreen(videos: sampleVideos),
                       // Content for Tab 3 (notifications)
-                      Center(child: Text('notifications Content')),
+                      const Center(child: Text('notifications Content')),
                       // Content for Tab 4 (Alerts)
                       MenuScreen(user: user, authService: authService),
                     ],

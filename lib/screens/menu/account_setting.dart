@@ -41,7 +41,7 @@ class AccountSetting extends StatelessWidget {
           );
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Password updated successfully!')),
+              const SnackBar(content: Text('Password updated successfully!')),
             );
           }
           oldPasswordController.text = '';
@@ -66,13 +66,13 @@ class AccountSetting extends StatelessWidget {
                     iconData: Icons.arrow_back_ios_new,
                   ),
                   const SizedBox(width: 10),
-                  CustomText(
+                  const CustomText(
                     'Account Setting',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               CustomTextField(
                 onChanged: (value) {
                   displayNameController.text = value;
@@ -80,17 +80,16 @@ class AccountSetting extends StatelessWidget {
                 controller: displayNameController,
                 labelText: 'Display Name',
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
               CustomTextField(
                 prefixIcon: Icons.email,
                 controller: emailController,
                 labelText: 'E-mail',
                 enabled: false,
               ),
-              SizedBox(height: 20),
-              CustomText('Update Password'),
-              SizedBox(height: 15),
-
+              const SizedBox(height: 20),
+              const CustomText('Update Password'),
+              const SizedBox(height: 15),
               CustomTextField(
                 prefixIcon: Icons.lock,
                 obscureText: true,
@@ -101,26 +100,24 @@ class AccountSetting extends StatelessWidget {
                 controller: oldPasswordController,
                 labelText: 'Please entre your old password',
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               CustomTextField(
                 prefixIcon: Icons.lock_reset,
-
                 obscureText: obscureText,
                 keyboardType: TextInputType.visiblePassword,
-
                 onChanged: (value) {
                   passwordController.text = value;
                 },
                 controller: passwordController,
                 labelText: 'New Password',
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: CustomButton(
                   onPressed: updatePasswordOrUserName,
                   text: 'Update',
-                  style: ButtonStyle(),
+                  style: const ButtonStyle(),
                 ),
               ),
             ],

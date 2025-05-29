@@ -11,10 +11,7 @@ class LoginScreen extends StatefulWidget {
   // Add this parameter
   final AuthService authService;
 
-  const LoginScreen({
-    super.key,
-    required this.authService, // Make it required
-  });
+  const LoginScreen({super.key, required this.authService});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
