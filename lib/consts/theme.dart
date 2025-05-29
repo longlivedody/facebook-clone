@@ -27,7 +27,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(8.0),
         borderSide: BorderSide(color: _lightPrimaryColor, width: 2.0),
       ),
-      labelStyle: TextStyle(color: _lightPrimaryColor),
+      labelStyle: TextStyle(color: _lightOnSecondaryColor),
       hintStyle: TextStyle(color: Colors.grey.shade500),
       // ... other input decoration defaults
     ),

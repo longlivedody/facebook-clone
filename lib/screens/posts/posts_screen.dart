@@ -1,7 +1,7 @@
-import 'package:facebook_clone/models/user_data_model.dart';
 import 'package:flutter/material.dart';
 
 // You'll create this file next
+import '../../models/post_data_model.dart';
 import 'post_item.dart';
 import 'post_shimmer_item.dart';
 
@@ -12,7 +12,8 @@ class PostsScreen extends StatefulWidget {
   State<PostsScreen> createState() => _PostsScreenState();
 }
 
-class _PostsScreenState extends State<PostsScreen> {
+class _PostsScreenState extends State<PostsScreen>
+    with AutomaticKeepAliveClientMixin {
   List<PostDataModel> _posts = []; // Initialize as empty
   bool _isLoading = true; // Start in loading state
 
@@ -36,6 +37,7 @@ class _PostsScreenState extends State<PostsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -44,7 +46,9 @@ class _PostsScreenState extends State<PostsScreen> {
             children: [
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () async {},
+                  onRefresh: () async {
+                    await _fetchPosts();
+                  },
                   child: _isLoading ? buildShimmerList() : buildPostsList(),
                 ),
               ),
@@ -66,8 +70,8 @@ class _PostsScreenState extends State<PostsScreen> {
         return Column(
           children: [
             const SizedBox(height: 10),
-            Divider(color: Theme.of(context).dividerColor),
-            const SizedBox(height: 10),
+            Divider(),
+            const SizedBox(height: 5),
           ],
         );
       },
@@ -77,7 +81,7 @@ class _PostsScreenState extends State<PostsScreen> {
       itemCount: _posts.length,
       itemBuilder: (context, index) {
         final post = _posts[index];
-        return HomeItem(postData: post);
+        return PostItem(postData: post);
       },
     );
   }
@@ -97,8 +101,12 @@ class _PostsScreenState extends State<PostsScreen> {
       },
       itemCount: _posts.length,
       itemBuilder: (context, index) {
-        return const HomeShimmerItem();
+        return const PostShimmerItem();
       },
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

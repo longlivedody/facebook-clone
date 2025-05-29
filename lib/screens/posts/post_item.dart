@@ -1,14 +1,14 @@
-import 'package:facebook_clone/models/user_data_model.dart';
+import 'package:facebook_clone/models/post_data_model.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 import '../../widgets/custom_text.dart';
 import 'comments_modal_sheet.dart';
 
-class HomeItem extends StatelessWidget {
+class PostItem extends StatelessWidget {
   final PostDataModel postData;
 
-  const HomeItem({super.key, required this.postData});
+  const PostItem({super.key, required this.postData});
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +29,14 @@ class HomeItem extends StatelessWidget {
         CustomText(postData.postText),
         const SizedBox(height: 10),
         // post image
-        FadeInImage.memoryNetwork(
-          placeholder: kTransparentImage,
-          image: postData.postImageUrl,
-          width: double.infinity,
-          fit: BoxFit.fill,
-          height: estimatedImageHeight,
-        ),
+        if (postData.postImageUrl.isNotEmpty)
+          FadeInImage.memoryNetwork(
+            placeholder: kTransparentImage,
+            image: postData.postImageUrl,
+            width: double.infinity,
+            fit: BoxFit.fill,
+            height: estimatedImageHeight,
+          ),
         const SizedBox(height: 10),
         // likes , comment and shares
         GestureDetector(

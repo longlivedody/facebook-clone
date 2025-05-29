@@ -1,3 +1,6 @@
+import 'package:facebook_clone/widgets/custom_button.dart';
+import 'package:facebook_clone/widgets/custom_text.dart';
+import 'package:facebook_clone/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 
 // Assuming your AuthService and User model are in 'auth_service.dart'
@@ -117,29 +120,25 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const Text(
+                CustomText(
                   'Create your Account',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
-                TextFormField(
+                CustomTextField(
                   controller: _displayNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Display Name (Optional)',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
+                  labelText: 'Display Name (Optional)',
+                  prefixIcon: Icons.person_outline,
                   textInputAction: TextInputAction.next,
                 ),
+
                 const SizedBox(height: 16),
-                TextFormField(
+                CustomTextField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
+                  labelText: 'Email',
+                  prefixIcon: Icons.email_outlined,
+                  textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -150,19 +149,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     }
                     return null;
                   },
-                  textInputAction: TextInputAction.next,
                 ),
+
                 const SizedBox(height: 16),
-                TextFormField(
+                CustomTextField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_outline),
-                  ),
+                  labelText: 'Password',
+                  prefixIcon: Icons.lock_outline,
                   obscureText: true,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Please enter your password';
                     }
                     if (value.length < 6) {
@@ -172,14 +168,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                   textInputAction: TextInputAction.next,
                 ),
+
                 const SizedBox(height: 16),
-                TextFormField(
+                CustomTextField(
+                  prefixIcon: Icons.lock_outline,
                   controller: _confirmPasswordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_outline),
-                  ),
+                  labelText: 'Confirm Password',
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -193,6 +187,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _isLoading ? null : _performSignUp(),
                 ),
+
                 const SizedBox(height: 24),
                 if (_errorMessage != null)
                   Padding(
@@ -208,14 +203,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          textStyle: const TextStyle(fontSize: 16),
-                        ),
-                        onPressed: _performSignUp,
-                        child: const Text('Sign Up'),
-                      ),
+                    : CustomButton(onPressed: _performSignUp, text: 'Sign Up'),
                 const SizedBox(height: 20),
                 TextButton(
                   onPressed: _isLoading

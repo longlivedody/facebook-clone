@@ -1,3 +1,4 @@
+import 'package:facebook_clone/screens/Auth/login_screen.dart';
 import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 
@@ -142,7 +143,14 @@ class _MenuScreenState extends State<MenuScreen> {
             onTap: () async {
               // Navigate to LoginScreen
               await widget.authService.signOut();
-              //
+              if (context.mounted) {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        LoginScreen(authService: widget.authService),
+                  ),
+                );
+              }
             },
           ),
         ],

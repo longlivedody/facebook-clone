@@ -1,4 +1,4 @@
-// In your models/user_data_model.dart
+// In your models/post_data_model.dart
 
 import 'comments_model.dart'; // Make sure this import is correct
 
@@ -21,7 +21,6 @@ class PostDataModel {
     required this.postText,
     required this.postImageUrl,
     required this.likesCount,
-
     required this.sharesCount,
     required this.postTime,
     required this.comments,
@@ -35,7 +34,7 @@ class PostDataModel {
       username: "Mahmoud Magdy",
       profileImageUrl: "https://picsum.photos/seed/user1/50/50",
       postText: "Having a great time exploring Flutter! #FlutterDev",
-      postImageUrl: "https://picsum.photos/seed/post1/600/400",
+      postImageUrl: "",
       likesCount: 1520,
       sharesCount: 35,
       postTime: '5:39 PM',

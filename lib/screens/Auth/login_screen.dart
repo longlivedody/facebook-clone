@@ -1,15 +1,20 @@
 import 'package:facebook_clone/screens/Auth/signup_screen.dart';
+import 'package:facebook_clone/screens/layout/layout_screen.dart';
 import 'package:facebook_clone/services/auth_service.dart';
 import 'package:facebook_clone/widgets/custom_button.dart';
 import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:facebook_clone/widgets/custom_text_field.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuthException
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
+  // Add this parameter
   final AuthService authService;
 
-  const LoginScreen({super.key, required this.authService});
+  const LoginScreen({
+    super.key,
+    required this.authService, // Make it required
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -20,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;
-  bool _isLoading = false; // Added for loading state
+  bool _isLoading = false;
 
   bool obscureText = true;
 
@@ -32,26 +37,53 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signIn() async {
-    // Validate form before proceeding
+    // Access authService from the widget instance
+    final authService = widget.authService;
+
+    // IMPORTANT: Get the user *after* successful sign-in
+    // final user = authService.currentUser; // MOVE THIS LINE
+
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
 
     setState(() {
       _errorMessage = null;
-      _isLoading = true; // Start loading
+      _isLoading = true;
     });
 
     try {
-      await widget.authService.signInWithEmailAndPassword(
+      // Use the passed-in authService
+      final user = await authService.signInWithEmailAndPassword(
+        // Capture the returned user
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // Navigation will be handled by the StreamBuilder in MyApp if successful
-      // No need to set _isLoading to false here if navigation occurs
+
+      // Check if sign-in was successful and a user object was returned
+      if (user != null && mounted) {
+        // Add mounted check before navigation
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => LayoutScreen(
+              user: user,
+              authService: authService,
+            ), // Pass the signed-in user
+          ),
+        );
+      } else if (mounted) {
+        // Handle case where signInWithEmailAndPassword returns null but no exception
+        // This might not happen with your current AuthService setup if it always rethrows
+        // or returns a user, but it's good practice.
+        setState(() {
+          _errorMessage = 'Login failed. Please try again.';
+          _isLoading = false; // Ensure loading is stopped
+        });
+      }
+      // If navigation occurs, _isLoading will be handled by the widget being disposed.
+      // If not, it's handled in finally or the else block above.
     } on FirebaseAuthException catch (e) {
       String message;
-      // Map Firebase error codes to user-friendly messages
       switch (e.code) {
         case 'user-not-found':
           message = 'No user found for that email.';
@@ -76,7 +108,6 @@ class _LoginScreenState extends State<LoginScreen> {
           message = 'An unexpected error occurred. Please try again.';
       }
       if (mounted) {
-        // Check if the widget is still in the tree
         setState(() {
           _errorMessage = message;
         });
@@ -85,7 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
         "Sign in failed with FirebaseAuthException: ${e.code} - ${e.message}",
       );
     } catch (e) {
-      // Catch any other generic errors
       if (mounted) {
         setState(() {
           _errorMessage = 'An unexpected error occurred. Please try again.';
@@ -93,10 +123,10 @@ class _LoginScreenState extends State<LoginScreen> {
       }
       debugPrint("Sign in failed with general error: $e");
     } finally {
-      if (mounted) {
+      if (mounted && _isLoading) {
+        // Only set if still loading (i.e., navigation didn't happen)
         setState(() {
-          _isLoading =
-              false; // Stop loading in all cases (error or if navigation doesn't happen)
+          _isLoading = false;
         });
       }
     }
@@ -104,6 +134,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Access authService from the widget instance for SignupScreen navigation
+    final authService = widget.authService;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -136,9 +169,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                       keyboardType: TextInputType.emailAddress,
-                      prefixIcon: Icons.email,
+                      prefixIcon: Icons.email_outlined,
                       controller: _emailController,
-                      labelText: 'Email', // Corrected label
+                      labelText: 'Email',
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
@@ -146,24 +180,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your password';
                         }
-                        // You could add password length validation here if desired
                         return null;
                       },
                       controller: _passwordController,
                       labelText: 'Password',
                       obscureText: obscureText,
-                      prefixIcon: Icons.lock,
+                      prefixIcon: Icons.lock_outline,
                       keyboardType: TextInputType.visiblePassword,
                       suffixIcon: obscureText
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
                       onSuffixIconTap: () {
                         setState(() {
                           obscureText = !obscureText;
                         });
                       },
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _isLoading ? null : _signIn(),
                     ),
-                    const SizedBox(height: 16), // Added space for error message
+                    const SizedBox(height: 16),
                     if (_errorMessage != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
@@ -176,28 +211,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                    const SizedBox(height: 10), // Adjusted space
+                    const SizedBox(height: 10),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: _isLoading
                           ? const Center(child: CircularProgressIndicator())
-                          : CustomButton(
-                              onPressed: _signIn,
-                              // No need for anonymous function if types match
-                              text: 'Login',
-                            ),
+                          : CustomButton(onPressed: _signIn, text: 'Login'),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
                       onPressed: _isLoading
                           ? null
                           : () {
-                              // Disable button while loading
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                   builder: (context) {
+                                    // Pass the authService instance here
                                     return SignupScreen(
-                                      authService: widget.authService,
+                                      authService: authService,
                                     );
                                   },
                                 ),

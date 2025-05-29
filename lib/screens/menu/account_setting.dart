@@ -1,3 +1,4 @@
+import 'package:facebook_clone/widgets/custom_button.dart';
 import 'package:facebook_clone/widgets/custom_icon_button.dart';
 import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:facebook_clone/widgets/custom_text_field.dart';
@@ -20,11 +21,34 @@ class AccountSetting extends StatelessWidget {
     final TextEditingController displayNameController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
+    final TextEditingController oldPasswordController = TextEditingController();
 
-    final String? displayName = user.displayName;
+    final String? displayName = authService.currentUser?.displayName;
     final String? email = user.email;
     displayNameController.text = displayName ?? '';
     emailController.text = email ?? '';
+    bool obscureText = true;
+
+    Future<void> updatePasswordOrUserName() async {
+      {
+        await authService.updateUserProfile(
+          displayName: displayNameController.text,
+        );
+        if (passwordController.text.isNotEmpty) {
+          await authService.updatePassword(
+            newPassword: passwordController.text,
+            oldPassword: oldPasswordController.text,
+          );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Password updated successfully!')),
+            );
+          }
+          oldPasswordController.text = '';
+          passwordController.text = '';
+        }
+      }
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -46,20 +70,6 @@ class AccountSetting extends StatelessWidget {
                     'Account Setting',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  Spacer(),
-                  CustomIconButton(
-                    onPressed: () async {
-                      await authService.updateUserProfile(
-                        displayName: displayNameController.text,
-                      );
-                      if (passwordController.text.isNotEmpty) {
-                        await authService.updatePassword(
-                          passwordController.text,
-                        );
-                      }
-                    },
-                    iconData: Icons.check,
-                  ),
                 ],
               ),
               SizedBox(height: 15),
@@ -72,6 +82,7 @@ class AccountSetting extends StatelessWidget {
               ),
               SizedBox(height: 25),
               CustomTextField(
+                prefixIcon: Icons.email,
                 controller: emailController,
                 labelText: 'E-mail',
                 enabled: false,
@@ -79,12 +90,38 @@ class AccountSetting extends StatelessWidget {
               SizedBox(height: 20),
               CustomText('Update Password'),
               SizedBox(height: 15),
+
               CustomTextField(
+                prefixIcon: Icons.lock,
+                obscureText: true,
+                keyboardType: TextInputType.visiblePassword,
+                onChanged: (value) {
+                  oldPasswordController.text = value;
+                },
+                controller: oldPasswordController,
+                labelText: 'Please entre your old password',
+              ),
+              SizedBox(height: 15),
+              CustomTextField(
+                prefixIcon: Icons.lock_reset,
+
+                obscureText: obscureText,
+                keyboardType: TextInputType.visiblePassword,
+
                 onChanged: (value) {
                   passwordController.text = value;
                 },
                 controller: passwordController,
-                labelText: 'Password',
+                labelText: 'New Password',
+              ),
+              SizedBox(height: 25),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: CustomButton(
+                  onPressed: updatePasswordOrUserName,
+                  text: 'Update',
+                  style: ButtonStyle(),
+                ),
               ),
             ],
           ),

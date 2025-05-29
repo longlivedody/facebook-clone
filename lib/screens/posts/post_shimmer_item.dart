@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-class HomeShimmerItem extends StatelessWidget {
-  const HomeShimmerItem({super.key});
+class PostShimmerItem extends StatelessWidget {
+  const PostShimmerItem({super.key});
 
   @override
   Widget build(BuildContext context) {

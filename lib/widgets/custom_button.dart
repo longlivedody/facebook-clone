@@ -63,6 +63,8 @@ class CustomButton extends StatelessWidget {
         if (states.contains(WidgetState.disabled)) return 0.0;
         return 4.0; // Default elevation
       }),
+      // Ensure the button itself can expand
+      minimumSize: WidgetStatePropertyAll<Size>(Size(double.infinity, 0)),
     );
 
     final ButtonStyle effectiveStyle = (themeButtonStyle ?? const ButtonStyle())
@@ -86,7 +88,10 @@ class CustomButton extends StatelessWidget {
       onPressed: onPressed,
       style: effectiveStyle,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        // Make the Row take full width
+        mainAxisSize: MainAxisSize.max,
+        // Center the content within the Row
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (icon != null) ...[
             IconTheme(

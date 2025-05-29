@@ -1,8 +1,5 @@
 import 'package:facebook_clone/consts/theme.dart';
-import 'package:facebook_clone/screens/Auth/login_screen.dart';
-import 'package:facebook_clone/screens/layout/layout_screen.dart';
 import 'package:facebook_clone/screens/layout/splash_screen.dart';
-import 'package:facebook_clone/services/auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,31 +66,12 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final AuthService _authService = AuthService();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       themeMode: _themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: StreamBuilder<User?>(
-        stream: _authService.authStateChanges,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return SplashScreen();
-            // Or a splash screen
-          }
-          if (snapshot.hasData && snapshot.data != null) {
-            // User is logged in
-            // Pass snapshot.data (which is your User object) to the home screen
-            return LayoutScreen(
-              user: snapshot.data!,
-              authService: _authService,
-            );
-          }
-          // User is not logged in
-          return LoginScreen(authService: _authService);
-        },
-      ),
+      home: SplashScreen(),
     );
   }
 }

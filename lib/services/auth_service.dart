@@ -123,17 +123,6 @@ class AuthService {
     }
   }
 
-  // --- Sign Out ---
-  Future<void> signOut() async {
-    try {
-      await _firebaseAuth.signOut();
-      debugPrint("User signed out successfully from Firebase.");
-    } catch (e) {
-      debugPrint("Error signing out: $e");
-      rethrow;
-    }
-  }
-
   // --- Send Password Reset Email ---
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
@@ -151,12 +140,19 @@ class AuthService {
   }
 
   // --- Update User Password (when user is logged in) ---
-  Future<void> updatePassword(String newPassword) async {
+  Future<void> updatePassword({
+    required String newPassword,
+    required String oldPassword,
+  }) async {
     final fbUser = _firebaseAuth.currentUser;
     if (fbUser == null) {
       throw Exception("User not logged in. Cannot update password.");
     }
     try {
+      await signInWithEmailAndPassword(
+        email: fbUser.email.toString(),
+        password: oldPassword,
+      );
       await fbUser.updatePassword(newPassword);
       debugPrint("Password updated successfully in Firebase.");
     } on fb_auth.FirebaseAuthException catch (e) {
@@ -239,6 +235,17 @@ class AuthService {
       rethrow;
     } catch (e) {
       debugPrint("An unexpected error occurred deleting account: $e");
+      rethrow;
+    }
+  }
+
+  // --- Sign Out ---
+  Future<void> signOut() async {
+    try {
+      await _firebaseAuth.signOut();
+      debugPrint("User signed out successfully from Firebase.");
+    } catch (e) {
+      debugPrint("Error signing out: $e");
       rethrow;
     }
   }
