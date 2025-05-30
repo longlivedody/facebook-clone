@@ -3,7 +3,7 @@ import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
-import '../../services/auth_service.dart';
+import '../../services/auth_services/auth_service.dart';
 import 'account_setting.dart';
 
 class MenuScreen extends StatefulWidget {
@@ -25,7 +25,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
     final Color sectionHeaderColor =
         Theme.of(context).textTheme.titleMedium?.color ??
-        (isDarkMode ? Colors.tealAccent : Colors.blueAccent);
+            (isDarkMode ? Colors.tealAccent : Colors.blueAccent);
 
     return Scaffold(
       body: ListView(

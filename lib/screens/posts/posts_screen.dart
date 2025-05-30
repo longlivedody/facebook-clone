@@ -5,8 +5,8 @@ import '../../models/post_data_model.dart';
 import 'post_item.dart';
 import 'post_shimmer_item.dart';
 import 'create_post_screen.dart';
-import 'package:facebook_clone/services/auth_service.dart';
-import 'package:facebook_clone/services/post_service.dart';
+import 'package:facebook_clone/services/auth_services/auth_service.dart';
+import 'package:facebook_clone/services/post_services/create_post_service.dart';
 import 'package:facebook_clone/widgets/custom_text.dart';
 
 class PostsScreen extends StatefulWidget {

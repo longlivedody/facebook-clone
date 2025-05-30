@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 // Assuming your AuthService and User model are in 'auth_service.dart'
 // Adjust the import path if it's located elsewhere.
 
-import '../../services/auth_service.dart';
+import '../../services/auth_services/auth_service.dart';
 import 'login_screen.dart'; // Or your actual path
 
 class SignupScreen extends StatefulWidget {

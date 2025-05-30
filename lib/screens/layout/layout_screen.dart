@@ -4,7 +4,7 @@ import 'package:facebook_clone/screens/reels/reels_screen.dart';
 import 'package:facebook_clone/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
-import '../../services/auth_service.dart';
+import '../../services/auth_services/auth_service.dart';
 import '../posts/posts_screen.dart';
 
 class LayoutScreen extends StatelessWidget {

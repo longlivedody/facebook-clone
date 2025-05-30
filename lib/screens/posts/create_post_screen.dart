@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:facebook_clone/services/auth_service.dart';
-import 'package:facebook_clone/services/post_service.dart';
+import 'package:facebook_clone/services/auth_services/auth_service.dart';
+import 'package:facebook_clone/services/post_services/create_post_service.dart';
 import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:facebook_clone/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';

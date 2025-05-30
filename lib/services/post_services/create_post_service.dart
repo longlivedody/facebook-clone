@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:facebook_clone/models/post_data_model.dart';
 import 'package:facebook_clone/models/comments_model.dart';
-import 'package:facebook_clone/services/auth_service.dart';
+import 'package:facebook_clone/services/auth_services/auth_service.dart';
 import 'package:flutter/foundation.dart';
 
 class PostService {

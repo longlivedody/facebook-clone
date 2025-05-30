@@ -1,6 +1,6 @@
 import 'package:facebook_clone/screens/Auth/signup_screen.dart';
 import 'package:facebook_clone/screens/layout/layout_screen.dart';
-import 'package:facebook_clone/services/auth_service.dart';
+import 'package:facebook_clone/services/auth_services/auth_service.dart';
 import 'package:facebook_clone/widgets/custom_button.dart';
 import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:facebook_clone/widgets/custom_text_field.dart';

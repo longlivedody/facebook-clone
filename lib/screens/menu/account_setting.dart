@@ -4,7 +4,7 @@ import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:facebook_clone/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 
-import '../../services/auth_service.dart';
+import '../../services/auth_services/auth_service.dart';
 
 class AccountSetting extends StatelessWidget {
   final User user;

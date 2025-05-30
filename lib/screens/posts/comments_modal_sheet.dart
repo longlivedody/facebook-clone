@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/comments_model.dart';
 import '../../widgets/custom_text.dart';
-import '../../services/comment_service.dart';
+import '../../services/post_services/comment_service.dart';
 
 void showCommentsModal({
   required BuildContext context,

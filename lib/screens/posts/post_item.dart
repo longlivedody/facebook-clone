@@ -1,8 +1,8 @@
 import 'package:facebook_clone/models/post_data_model.dart';
-import 'package:facebook_clone/services/comment_service.dart';
-import 'package:facebook_clone/services/like_service.dart';
+import 'package:facebook_clone/services/post_services/comment_service.dart';
+import 'package:facebook_clone/services/post_services/like_service.dart';
 import 'package:flutter/material.dart';
-import 'package:facebook_clone/services/auth_service.dart';
+import 'package:facebook_clone/services/auth_services/auth_service.dart';
 
 import '../../utils/image_utils.dart';
 import '../../widgets/custom_text.dart';

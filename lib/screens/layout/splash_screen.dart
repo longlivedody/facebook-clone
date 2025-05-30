@@ -1,4 +1,4 @@
-import 'package:facebook_clone/services/auth_service.dart'; // Your AuthService
+import 'package:facebook_clone/services/auth_services/auth_service.dart'; // Your AuthService
 import 'package:flutter/material.dart';
 
 // Assuming you have these screen imports
