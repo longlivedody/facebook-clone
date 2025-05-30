@@ -9,6 +9,8 @@ import 'package:facebook_clone/services/auth_services/auth_service.dart';
 import 'package:facebook_clone/services/post_services/create_post_service.dart';
 import 'package:facebook_clone/widgets/custom_text.dart';
 
+/// A screen that displays a list of posts with pull-to-refresh functionality
+/// and the ability to create new posts.
 class PostsScreen extends StatefulWidget {
   final User user;
   final AuthService authService;
@@ -36,6 +38,7 @@ class _PostsScreenState extends State<PostsScreen>
     _initializePosts();
   }
 
+  /// Initializes the posts by checking the connection and loading data
   Future<void> _initializePosts() async {
     try {
       // Check Firestore connection
@@ -60,6 +63,7 @@ class _PostsScreenState extends State<PostsScreen>
     }
   }
 
+  /// Navigates to the create post screen
   void _navigateToCreatePost() {
     Navigator.push(
       context,
@@ -72,6 +76,7 @@ class _PostsScreenState extends State<PostsScreen>
     );
   }
 
+  /// Refreshes the posts list
   Future<void> _refreshPosts() async {
     setState(() {
       _error = null;
@@ -92,7 +97,7 @@ class _PostsScreenState extends State<PostsScreen>
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: _refreshPosts,
-                  child: _isLoading ? buildShimmerList() : buildPostsList(),
+                  child: _isLoading ? _buildShimmerList() : _buildPostsList(),
                 ),
               ),
             ],
@@ -106,25 +111,13 @@ class _PostsScreenState extends State<PostsScreen>
     );
   }
 
-  Widget buildPostsList() {
+  /// Builds the main posts list with error handling and empty state
+  Widget _buildPostsList() {
     if (!_isConnected) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.cloud_off, size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
-            CustomText(
-              _error ?? 'No connection',
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _refreshPosts,
-              child: const CustomText('Try Again'),
-            ),
-          ],
-        ),
+      return _buildErrorView(
+        icon: Icons.cloud_off,
+        message: _error ?? 'No connection',
+        color: Colors.grey,
       );
     }
 
@@ -132,80 +125,86 @@ class _PostsScreenState extends State<PostsScreen>
       stream: _postService.getPosts(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                const SizedBox(height: 16),
-                CustomText(
-                  'Error: ${snapshot.error}',
-                  style: const TextStyle(color: Colors.red),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _refreshPosts,
-                  child: const CustomText('Try Again'),
-                ),
-              ],
-            ),
+          return _buildErrorView(
+            icon: Icons.error_outline,
+            message: 'Error: ${snapshot.error}',
+            color: Colors.red,
           );
         }
 
         if (!snapshot.hasData) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         final posts = snapshot.data!;
-
         if (posts.isEmpty) {
           return const Center(
             child: CustomText('No posts yet. Be the first to post!'),
           );
         }
 
-        return ListView.separated(
-          separatorBuilder: (context, index) {
-            return const Column(
-              children: [
-                SizedBox(height: 10),
-                Divider(),
-                SizedBox(height: 5),
-              ],
-            );
-          },
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          itemCount: posts.length,
-          itemBuilder: (context, index) {
-            final post = posts[index];
-            return PostItem(postData: post);
-          },
-        );
+        return _buildPostsListView(posts);
       },
     );
   }
 
-  Widget buildShimmerList() {
+  /// Builds a list view of posts with separators
+  Widget _buildPostsListView(List<PostDataModel> posts) {
     return ListView.separated(
-      separatorBuilder: (context, index) {
-        return Column(
-          children: [
-            const SizedBox(height: 10),
-            Divider(
-              color: Theme.of(context).dividerColor.withAlpha(50),
-            ),
-            const SizedBox(height: 10),
-          ],
-        );
-      },
+      separatorBuilder: _buildSeparator,
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      itemCount: posts.length,
+      itemBuilder: (context, index) => PostItem(postData: posts[index]),
+    );
+  }
+
+  /// Builds a shimmer loading list
+  Widget _buildShimmerList() {
+    return ListView.separated(
+      separatorBuilder: _buildSeparator,
       itemCount: 3,
-      itemBuilder: (context, index) {
-        return const PostShimmerItem();
-      },
+      itemBuilder: (_, __) => const PostShimmerItem(),
+    );
+  }
+
+  /// Builds a separator widget for the list
+  Widget _buildSeparator(BuildContext context, int index) {
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Divider(
+          color: Theme.of(context).dividerColor.withAlpha(50),
+        ),
+        const SizedBox(height: 5),
+      ],
+    );
+  }
+
+  /// Builds an error view with icon, message and retry button
+  Widget _buildErrorView({
+    required IconData icon,
+    required String message,
+    required Color color,
+  }) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 48, color: color),
+          const SizedBox(height: 16),
+          CustomText(
+            message,
+            style: TextStyle(color: color),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _refreshPosts,
+            child: const CustomText('Try Again'),
+          ),
+        ],
+      ),
     );
   }
 

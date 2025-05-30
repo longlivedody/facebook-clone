@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:facebook_clone/services/auth_services/auth_service.dart';
 
 class LikeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _postsCollection = 'posts';
   final String _likesCollection = 'likes';
+  final AuthService _authService = AuthService();
 
   // Check if user has liked a post
   Future<bool> hasUserLikedPost(String postId, String userId) async {
@@ -20,13 +22,34 @@ class LikeService {
     }
   }
 
+  // Get stream of like status for a post and user
+  Stream<bool> getLikeStatusStream(String postId, String userId) {
+    return _firestore
+        .collection(_likesCollection)
+        .doc('${postId}_$userId')
+        .snapshots()
+        .map((snapshot) => snapshot.exists);
+  }
+
+  // Get stream of likes count for a post
+  Stream<int> getLikesCountStream(String postId) {
+    return _firestore
+        .collection(_postsCollection)
+        .doc(postId)
+        .snapshots()
+        .map((snapshot) => snapshot.data()?['likesCount'] ?? 0);
+  }
+
   // Toggle like for a post
-  Future<void> toggleLike(
-      String postId, String userId, String displayName) async {
+  Future<void> toggleLike(String postId, String userId) async {
     try {
       final likeRef =
           _firestore.collection(_likesCollection).doc('${postId}_$userId');
       final postRef = _firestore.collection(_postsCollection).doc(postId);
+
+      // Get current user's display name
+      final currentUser = _authService.currentUser;
+      final displayName = currentUser?.displayName ?? 'Anonymous';
 
       await _firestore.runTransaction((transaction) async {
         final likeDoc = await transaction.get(likeRef);
