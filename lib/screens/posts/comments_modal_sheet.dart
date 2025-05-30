@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../models/comments_model.dart';
 import '../../widgets/custom_text.dart';
 import '../../services/post_services/comment_service.dart';
+import 'likes_screen.dart';
 
 void showCommentsModal({
   required BuildContext context,
@@ -11,6 +13,7 @@ void showCommentsModal({
   required Function(String) onCommentSent,
 }) {
   final commentService = CommentService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   showModalBottomSheet<void>(
     context: context,
@@ -37,44 +40,103 @@ void showCommentsModal({
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     decoration: BoxDecoration(
                       color: Colors.grey[400],
-                      // A slightly darker grey for visibility
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
-                // Comments Count Header
-                StreamBuilder<List<CommentsModel>>(
-                  stream: commentService.getComments(postId),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
+                // Post Stats Header
+                StreamBuilder<DocumentSnapshot>(
+                  stream: _firestore
+                      .collection('posts')
+                      .where('postId', isEqualTo: postId)
+                      .snapshots()
+                      .map((snapshot) => snapshot.docs.first),
+                  builder: (context, postSnapshot) {
+                    if (postSnapshot.hasError) {
                       return Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: CustomText(
-                          'Error loading comments',
+                          'Error loading post data',
                           style: TextStyle(color: Colors.red),
                         ),
                       );
                     }
 
-                    final comments = snapshot.data ?? [];
+                    if (!postSnapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                      child: CustomText(
-                        '${comments.length} Comment${comments.length == 1 ? "" : "s"}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    final postData =
+                        postSnapshot.data!.data() as Map<String, dynamic>;
+                    final likesCount = postData['likesCount'] ?? 0;
+                    final documentId = postSnapshot.data!.id;
+
+                    return StreamBuilder<List<CommentsModel>>(
+                      stream: commentService.getComments(postId),
+                      builder: (context, commentsSnapshot) {
+                        if (commentsSnapshot.hasError) {
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: CustomText(
+                              'Error loading comments',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
+
+                        final comments = commentsSnapshot.data ?? [];
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 8.0,
+                          ),
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LikesScreen(
+                                          postId: documentId,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Row(
+                                    children: [
+                                      CustomText(
+                                        '$likesCount Like${likesCount == 1 ? "" : "s"}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Icon(Icons.arrow_forward_ios)
+                                    ],
+                                  )),
+                              Spacer(),
+                              CustomText(
+                                '${comments.length} Comment${comments.length == 1 ? "" : "s"}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
                 const Divider(height: 1),
-                // Visual separator
 
                 // List of Comments
                 Expanded(
@@ -112,7 +174,6 @@ void showCommentsModal({
                           return Divider(color: Colors.grey[400]);
                         },
                         controller: scrollController,
-                        // Important for DraggableScrollableSheet
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10.0,
                           vertical: 5.0,
@@ -121,7 +182,6 @@ void showCommentsModal({
                         itemBuilder: (BuildContext context, int index) {
                           final CommentsModel currentComment = comments[index];
                           return Padding(
-                            // Add some padding around each comment item
                             padding: const EdgeInsets.symmetric(
                               vertical: 8.0,
                             ),
@@ -142,8 +202,8 @@ void showCommentsModal({
                                           Icons.person,
                                           size: 25,
                                           color: Colors.white,
-                                        ) // Show icon if URL is bad
-                                      : null, // No child if backgroundImage is expected to load
+                                        )
+                                      : null,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -185,11 +245,10 @@ void showCommentsModal({
 
                 Padding(
                   padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(modalContext).viewInsets.bottom +
-                        10, // Adjust for keyboard and some spacing
+                    bottom: MediaQuery.of(modalContext).viewInsets.bottom + 10,
                     left: 16.0,
                     right: 16.0,
-                    top: 8.0, // Spacing above the text field
+                    top: 8.0,
                   ),
                   child: TextFormField(
                     controller: controller,

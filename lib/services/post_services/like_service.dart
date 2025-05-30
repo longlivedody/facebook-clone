@@ -21,7 +21,8 @@ class LikeService {
   }
 
   // Toggle like for a post
-  Future<void> toggleLike(String postId, String userId) async {
+  Future<void> toggleLike(
+      String postId, String userId, String displayName) async {
     try {
       final likeRef =
           _firestore.collection(_likesCollection).doc('${postId}_$userId');
@@ -44,6 +45,7 @@ class LikeService {
           transaction.set(likeRef, {
             'userId': userId,
             'postId': postId,
+            'displayName': displayName,
             'timestamp': Timestamp.now(),
           });
           transaction.update(postRef, {'likesCount': currentLikes + 1});

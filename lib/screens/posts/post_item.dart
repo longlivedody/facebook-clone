@@ -53,7 +53,8 @@ class _PostItemState extends State<PostItem> {
     });
 
     try {
-      await _likeService.toggleLike(widget.postData.documentId, user.uid);
+      await _likeService.toggleLike(
+          widget.postData.documentId, user.uid, widget.postData.username);
     } catch (e) {
       // Revert the state if the operation fails
       setState(() {
@@ -101,7 +102,7 @@ class _PostItemState extends State<PostItem> {
           ),
         const SizedBox(height: 10),
         // likes , comment and shares
-        GestureDetector(
+        InkWell(
           onTap: () {
             showCommentsModal(
               context: context,
@@ -131,10 +132,29 @@ class _PostItemState extends State<PostItem> {
               },
             );
           },
-          child: reactsCommentsShares(
-            likesCount: _likesCount,
-            commentsCount: widget.postData.commentsCount,
-            sharesCount: widget.postData.sharesCount,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              child: Row(
+                children: [
+                  CustomText(
+                      '$_likesCount ${_likesCount == 1 ? 'like' : 'likes'}',
+                      style: const TextStyle(fontSize: 12)),
+                  Spacer(),
+                  CustomText(
+                      '${widget.postData.commentsCount} ${widget.postData.commentsCount == 1 ? 'comment' : 'comments'}',
+                      style: const TextStyle(fontSize: 12)),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  CustomText(
+                      '${widget.postData.sharesCount} ${widget.postData.sharesCount == 1 ? 'share' : 'shares'}',
+                      style: const TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 15),
@@ -268,24 +288,5 @@ Widget userSection({
         ],
       ),
     ],
-  );
-}
-
-Widget reactsCommentsShares({
-  required int likesCount,
-  required int commentsCount,
-  required int sharesCount,
-}) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        CustomText('$likesCount likes', style: const TextStyle(fontSize: 12)),
-        CustomText('$commentsCount comments',
-            style: const TextStyle(fontSize: 12)),
-        CustomText('$sharesCount shares', style: const TextStyle(fontSize: 12)),
-      ],
-    ),
   );
 }
