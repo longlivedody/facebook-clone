@@ -1,5 +1,6 @@
 import 'package:facebook_clone/models/post_data_model.dart';
 import 'package:facebook_clone/services/comment_service.dart';
+import 'package:facebook_clone/services/like_service.dart';
 import 'package:flutter/material.dart';
 import 'package:facebook_clone/services/auth_service.dart';
 
@@ -7,34 +8,85 @@ import '../../utils/image_utils.dart';
 import '../../widgets/custom_text.dart';
 import 'comments_modal_sheet.dart';
 
-class PostItem extends StatelessWidget {
+class PostItem extends StatefulWidget {
   final PostDataModel postData;
-  final CommentService _commentService = CommentService();
 
-  PostItem({super.key, required this.postData});
+  const PostItem({super.key, required this.postData});
+
+  @override
+  State<PostItem> createState() => _PostItemState();
+}
+
+class _PostItemState extends State<PostItem> {
+  final CommentService _commentService = CommentService();
+  final LikeService _likeService = LikeService();
+  bool _isLiked = false;
+  int _likesCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _likesCount = widget.postData.likesCount;
+    _checkInitialLikeStatus();
+  }
+
+  Future<void> _checkInitialLikeStatus() async {
+    final user = AuthService().currentUser;
+    if (user != null) {
+      final hasLiked = await _likeService.hasUserLikedPost(
+          widget.postData.documentId, user.uid);
+      if (mounted) {
+        setState(() {
+          _isLiked = hasLiked;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleLike() async {
+    final user = AuthService().currentUser;
+    if (user == null) return;
+
+    setState(() {
+      _isLiked = !_isLiked;
+      _likesCount += _isLiked ? 1 : -1;
+    });
+
+    try {
+      await _likeService.toggleLike(widget.postData.documentId, user.uid);
+    } catch (e) {
+      // Revert the state if the operation fails
+      setState(() {
+        _isLiked = !_isLiked;
+        _likesCount += _isLiked ? 1 : -1;
+      });
+      debugPrint('Error toggling like: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final TextEditingController controller = TextEditingController();
     final screenWidth = MediaQuery.of(context).size.width;
     final estimatedImageHeight = screenWidth * (9 / 16);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // profile image , name , post time
         userSection(
-          username: postData.username,
-          profileImageUrl: postData.profileImageUrl,
-          postTime: _getTimeAgo(postData.postTime.toDate()),
+          username: widget.postData.username,
+          profileImageUrl: widget.postData.profileImageUrl,
+          postTime: _getTimeAgo(widget.postData.postTime.toDate()),
         ),
         const SizedBox(height: 10),
         // post content
-        CustomText(postData.postText),
+        CustomText(widget.postData.postText),
         const SizedBox(height: 10),
         // post image
-        if (postData.postImageUrl.isNotEmpty)
+        if (widget.postData.postImageUrl.isNotEmpty)
           Image(
-            image: ImageUtils.getImageProvider(postData.postImageUrl),
+            image: ImageUtils.getImageProvider(widget.postData.postImageUrl),
             width: double.infinity,
             fit: BoxFit.fill,
             height: estimatedImageHeight,
@@ -53,14 +105,14 @@ class PostItem extends StatelessWidget {
           onTap: () {
             showCommentsModal(
               context: context,
-              comments: postData.comments,
+              postId: widget.postData.postId,
               controller: controller,
               onCommentSent: (String comment) async {
                 try {
                   final user = AuthService().currentUser;
                   if (user != null) {
                     await _commentService.addComment(
-                      postId: postData.postId,
+                      postId: widget.postData.postId,
                       commentText: comment,
                       user: user,
                     );
@@ -80,14 +132,85 @@ class PostItem extends StatelessWidget {
             );
           },
           child: reactsCommentsShares(
-            likesCount: postData.likesCount,
-            commentsCount: postData.commentsCount,
-            sharesCount: postData.sharesCount,
+            likesCount: _likesCount,
+            commentsCount: widget.postData.commentsCount,
+            sharesCount: widget.postData.sharesCount,
           ),
         ),
         const SizedBox(height: 15),
         // buttons like , comment and share
-        actionsSection(),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 25.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: _handleLike,
+                child: Row(
+                  children: [
+                    Icon(
+                      _isLiked ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
+                      color: _isLiked ? Colors.blue : null,
+                    ),
+                    SizedBox(width: 5),
+                    CustomText(
+                      'Like',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _isLiked ? Colors.blue : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  showCommentsModal(
+                    context: context,
+                    postId: widget.postData.postId,
+                    controller: controller,
+                    onCommentSent: (String comment) async {
+                      try {
+                        final user = AuthService().currentUser;
+                        if (user != null) {
+                          await _commentService.addComment(
+                            postId: widget.postData.postId,
+                            commentText: comment,
+                            user: user,
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Failed to send comment: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  );
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.comment),
+                    SizedBox(width: 5),
+                    CustomText('Comment', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.share),
+                  SizedBox(width: 5),
+                  CustomText('Share', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ],
+          ),
+        )
       ],
     );
   }
@@ -162,38 +285,6 @@ Widget reactsCommentsShares({
         CustomText('$commentsCount comments',
             style: const TextStyle(fontSize: 12)),
         CustomText('$sharesCount shares', style: const TextStyle(fontSize: 12)),
-      ],
-    ),
-  );
-}
-
-Widget actionsSection() {
-  return const Padding(
-    padding: EdgeInsets.symmetric(horizontal: 25.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.thumb_up_alt_outlined),
-            SizedBox(width: 5),
-            CustomText('Like', style: TextStyle(fontSize: 12)),
-          ],
-        ),
-        Row(
-          children: [
-            Icon(Icons.comment),
-            SizedBox(width: 5),
-            CustomText('Comment', style: TextStyle(fontSize: 12)),
-          ],
-        ),
-        Row(
-          children: [
-            Icon(Icons.share),
-            SizedBox(width: 5),
-            CustomText('Share', style: TextStyle(fontSize: 12)),
-          ],
-        ),
       ],
     ),
   );

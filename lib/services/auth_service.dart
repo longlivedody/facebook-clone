@@ -79,8 +79,6 @@ class AuthService {
         // Reload the user to get the updated profile
         await userCredential.user!.reload();
 
-        // It's good practice to re-fetch the user or use the one from userCredential
-        // to ensure all properties (like an updated displayName) are fresh.
         final freshFirebaseUser = _firebaseAuth.currentUser;
         if (freshFirebaseUser != null) {
           return User.fromFirebaseUser(freshFirebaseUser);

@@ -14,6 +14,7 @@ class PostDataModel {
   final int sharesCount;
   final List<CommentsModel> comments;
   final String userId;
+  final String documentId;
 
   PostDataModel({
     required this.postId,
@@ -26,6 +27,7 @@ class PostDataModel {
     required this.sharesCount,
     required this.comments,
     required this.userId,
+    required this.documentId,
   });
 
   int get commentsCount => comments.length;
@@ -60,6 +62,7 @@ class PostDataModel {
               .toList() ??
           [],
       userId: map['userId'] ?? '',
+      documentId: map['documentId'] ?? '',
     );
   }
 }

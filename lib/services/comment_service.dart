@@ -50,4 +50,25 @@ class CommentService {
       }
     }
   }
+
+  // Stream comments for a specific post
+  Stream<List<CommentsModel>> getComments(int postId) {
+    return _firestore
+        .collection(_collection)
+        .where('postId', isEqualTo: postId)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.docs.isEmpty) return [];
+
+      final postData = snapshot.docs.first.data();
+      final comments = postData['comments'] as List<dynamic>? ?? [];
+
+      return comments
+          .map((comment) =>
+              CommentsModel.fromMap(comment as Map<String, dynamic>))
+          .toList()
+        ..sort((a, b) => b.timestamp
+            .compareTo(a.timestamp)); // Sort by timestamp in descending order
+    });
+  }
 }

@@ -18,6 +18,9 @@ class PostService {
     int retryCount = 0;
     while (retryCount < _maxRetries) {
       try {
+        // Create a new document reference to get the ID
+        final docRef = _firestore.collection(_collection).doc();
+
         final post = PostDataModel(
           postId: DateTime.now().millisecondsSinceEpoch,
           username: user.displayName ?? 'Anonymous',
@@ -29,9 +32,10 @@ class PostService {
           sharesCount: 0,
           comments: [],
           userId: user.uid,
+          documentId: docRef.id,
         );
 
-        await _firestore.collection(_collection).add(post.toMap());
+        await docRef.set(post.toMap());
         return;
       } catch (e) {
         retryCount++;
@@ -47,12 +51,8 @@ class PostService {
   // Get all posts
   Stream<List<PostDataModel>> getPosts() {
     try {
-      return _firestore
-          .collection(_collection)
-          .orderBy('postTime', descending: true)
-          .snapshots()
-          .map((snapshot) {
-        return snapshot.docs.map((doc) {
+      return _firestore.collection(_collection).snapshots().map((snapshot) {
+        final posts = snapshot.docs.map((doc) {
           final data = doc.data();
           final comments = (data['comments'] as List<dynamic>?)?.map((comment) {
                 return CommentsModel.fromMap(comment);
@@ -70,8 +70,13 @@ class PostService {
             postTime: data['postTime'],
             comments: comments,
             userId: data['userId'] ?? '',
+            documentId: doc.id,
           );
         }).toList();
+
+        // Sort posts by postTime in descending order
+        posts.sort((a, b) => b.postTime.compareTo(a.postTime));
+        return posts;
       });
     } catch (e) {
       debugPrint('Error getting posts: $e');

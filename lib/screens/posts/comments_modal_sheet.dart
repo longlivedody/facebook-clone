@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../models/comments_model.dart';
 import '../../widgets/custom_text.dart';
+import '../../services/comment_service.dart';
 
 void showCommentsModal({
   required BuildContext context,
-  required List<CommentsModel> comments,
+  required int postId,
   required TextEditingController controller,
   required Function(String) onCommentSent,
 }) {
+  final commentService = CommentService();
+
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -40,104 +43,144 @@ void showCommentsModal({
                   ),
                 ),
                 // Comments Count Header
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
-                  child: CustomText(
-                    '${comments.length} Comment${comments.length == 1 ? "" : "s"}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                StreamBuilder<List<CommentsModel>>(
+                  stream: commentService.getComments(postId),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: CustomText(
+                          'Error loading comments',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      );
+                    }
+
+                    final comments = snapshot.data ?? [];
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: CustomText(
+                        '${comments.length} Comment${comments.length == 1 ? "" : "s"}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const Divider(height: 1),
                 // Visual separator
 
                 // List of Comments
                 Expanded(
-                  child: comments.isEmpty
-                      ? const Center(
+                  child: StreamBuilder<List<CommentsModel>>(
+                    stream: commentService.getComments(postId),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: CustomText(
+                            'Error loading comments',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        );
+                      }
+
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      final comments = snapshot.data!;
+
+                      if (comments.isEmpty) {
+                        return const Center(
                           child: CustomText(
                             'No comments yet. Be the first to comment!',
                             style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
-                        )
-                      : ListView.separated(
-                          separatorBuilder: (context, index) {
-                            return Divider(color: Colors.grey[400]);
-                          },
-                          controller: scrollController,
-                          // Important for DraggableScrollableSheet
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10.0,
-                            vertical: 5.0,
-                          ),
-                          itemCount: comments.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final CommentsModel currentComment =
-                                comments[index];
-                            return Padding(
-                              // Add some padding around each comment item
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 25,
-                                    backgroundColor: Colors.grey[300],
-                                    backgroundImage:
-                                        (currentComment.userImgUrl.isNotEmpty)
-                                            ? NetworkImage(
-                                                currentComment.userImgUrl,
-                                              )
-                                            : null,
-                                    child: (currentComment.userImgUrl.isEmpty)
-                                        ? const Icon(
-                                            Icons.person,
-                                            size: 25,
-                                            color: Colors.white,
-                                          ) // Show icon if URL is bad
-                                        : null, // No child if backgroundImage is expected to load
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        CustomText(
-                                          currentComment.username,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        CustomText(
-                                          currentComment.comment,
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        CustomText(
-                                          _getTimeAgo(currentComment.timestamp),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                        );
+                      }
+
+                      return ListView.separated(
+                        separatorBuilder: (context, index) {
+                          return Divider(color: Colors.grey[400]);
+                        },
+                        controller: scrollController,
+                        // Important for DraggableScrollableSheet
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0,
+                          vertical: 5.0,
                         ),
+                        itemCount: comments.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final CommentsModel currentComment = comments[index];
+                          return Padding(
+                            // Add some padding around each comment item
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 25,
+                                  backgroundColor: Colors.grey[300],
+                                  backgroundImage:
+                                      (currentComment.userImgUrl.isNotEmpty)
+                                          ? NetworkImage(
+                                              currentComment.userImgUrl,
+                                            )
+                                          : null,
+                                  child: (currentComment.userImgUrl.isEmpty)
+                                      ? const Icon(
+                                          Icons.person,
+                                          size: 25,
+                                          color: Colors.white,
+                                        ) // Show icon if URL is bad
+                                      : null, // No child if backgroundImage is expected to load
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      CustomText(
+                                        currentComment.username,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      CustomText(
+                                        currentComment.comment,
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      CustomText(
+                                        _getTimeAgo(currentComment.timestamp),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
 
                 Padding(
