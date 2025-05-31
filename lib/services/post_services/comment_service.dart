@@ -17,14 +17,6 @@ class CommentService {
     int retryCount = 0;
     while (retryCount < _maxRetries) {
       try {
-        final comment = CommentsModel(
-          userImgUrl: user.photoURL ?? '',
-          username: user.displayName ?? 'Anonymous',
-          comment: commentText,
-          timestamp: DateTime.now(),
-          userId: user.uid,
-        );
-
         // Find the post document by postId
         final querySnapshot = await _firestore
             .collection(_collection)
@@ -36,15 +28,82 @@ class CommentService {
         }
 
         final postDoc = querySnapshot.docs.first;
-        await postDoc.reference.update({
-          'comments': FieldValue.arrayUnion([comment.toMap()])
+        final postRef = postDoc.reference;
+
+        // Create the comment
+        final comment = CommentsModel(
+          userImgUrl: user.photoURL ?? '',
+          username: user.displayName ?? 'Anonymous',
+          comment: commentText,
+          timestamp: DateTime.now(),
+          userId: user.uid,
+        );
+
+        // Add comment and increment comment count atomically
+        await postRef.update({
+          'comments': FieldValue.arrayUnion([comment.toMap()]),
+          'commentsCount': FieldValue.increment(1)
         });
+
         return;
       } catch (e) {
         retryCount++;
         if (retryCount == _maxRetries) {
           debugPrint('Error adding comment after $_maxRetries attempts: $e');
           throw Exception('Failed to add comment: $e');
+        }
+        await Future.delayed(Duration(seconds: retryCount));
+      }
+    }
+  }
+
+  // Delete a comment from a post
+  Future<void> deleteComment({
+    required int postId,
+    required String userId,
+    required DateTime timestamp,
+  }) async {
+    int retryCount = 0;
+    while (retryCount < _maxRetries) {
+      try {
+        // Find the post document
+        final querySnapshot = await _firestore
+            .collection(_collection)
+            .where('postId', isEqualTo: postId)
+            .get();
+
+        if (querySnapshot.docs.isEmpty) {
+          throw Exception('Post not found');
+        }
+
+        final postDoc = querySnapshot.docs.first;
+        final postData = postDoc.data();
+        final comments = postData['comments'] as List<dynamic>? ?? [];
+
+        // Find the comment to delete
+        final commentToDelete = comments.firstWhere(
+          (comment) =>
+              comment['userId'] == userId &&
+              comment['timestamp'].toDate() == timestamp,
+          orElse: () => null,
+        );
+
+        if (commentToDelete == null) {
+          throw Exception('Comment not found');
+        }
+
+        // Remove comment and decrement comment count atomically
+        await postDoc.reference.update({
+          'comments': FieldValue.arrayRemove([commentToDelete]),
+          'commentsCount': FieldValue.increment(-1)
+        });
+
+        return;
+      } catch (e) {
+        retryCount++;
+        if (retryCount == _maxRetries) {
+          debugPrint('Error deleting comment after $_maxRetries attempts: $e');
+          throw Exception('Failed to delete comment: $e');
         }
         await Future.delayed(Duration(seconds: retryCount));
       }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 // Adjust the import path if it's located elsewhere.
 
 import '../../services/auth_services/auth_service.dart';
+import '../../services/auth_services/firestore_service.dart';
 import 'login_screen.dart'; // Or your actual path
 
 class SignupScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _firestoreService = FirestoreService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -53,11 +55,16 @@ class _SignupScreenState extends State<SignupScreen> {
           password: _passwordController.text.trim(),
           displayName: _displayNameController.text.trim().isNotEmpty
               ? _displayNameController.text.trim()
-              : null, // Only pass if not empty
+              : null,
         );
 
         if (user != null) {
-          // Sign up successful
+          // Create user profile in Firestore
+          await _firestoreService.createUserProfile(
+            uid: user.uid,
+            email: user.email!,
+            displayName: user.displayName,
+          );
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -69,20 +76,12 @@ class _SignupScreenState extends State<SignupScreen> {
             );
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) {
-                  return LoginScreen(authService: widget.authService);
-                },
+                builder: (context) =>
+                    LoginScreen(authService: widget.authService),
               ),
             );
-            // Example: Pop if this screen was pushed onto a stack
-            // if (Navigator.canPop(context)) {
-            //   Navigator.of(context).pop();
-            // }
           }
         } else {
-          // This case should ideally not happen if signUpWithEmailAndPassword
-          // throws an exception on failure, which it does.
-          // But as a fallback:
           if (mounted) {
             setState(() {
               _errorMessage = 'Signup failed. Please try again.';
@@ -92,9 +91,6 @@ class _SignupScreenState extends State<SignupScreen> {
       } catch (e) {
         if (mounted) {
           setState(() {
-            // You can inspect 'e' (if it's a FirebaseAuthException)
-            // to provide more specific error messages.
-            // For example: if (e is FirebaseAuthException && e.code == 'email-already-in-use')
             _errorMessage = 'Signup failed: ${e.toString()}';
           });
         }

@@ -103,12 +103,45 @@ class LikeService {
     return controller.stream;
   }
 
+  // Get users who liked a post
+  Stream<List<Map<String, dynamic>>> getPostLikes(String postId) {
+    return _firestore
+        .collection(_likesCollection)
+        .where('postId', isEqualTo: postId)
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'userId': data['userId'],
+          'displayName': data['displayName'],
+          'timestamp': data['timestamp'],
+        };
+      }).toList();
+    });
+  }
+
+  // Get posts liked by a user
+  Stream<List<String>> getUserLikedPosts(String userId) {
+    return _firestore
+        .collection(_likesCollection)
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => doc.data()['postId'] as String)
+          .toList();
+    });
+  }
+
   // Toggle like for a post with optimistic updates
   Future<void> toggleLike(String postId, String userId) async {
     final cacheKey = '${postId}_$userId';
     try {
       final likeRef = _firestore.collection(_likesCollection).doc(cacheKey);
       final postRef = _firestore.collection(_postsCollection).doc(postId);
+      final userRef = _firestore.collection('users').doc(userId);
 
       // Get current user's display name
       final currentUser = _authService.currentUser;
@@ -132,6 +165,7 @@ class LikeService {
       await _firestore.runTransaction((transaction) async {
         final likeDoc = await transaction.get(likeRef);
         final postDoc = await transaction.get(postRef);
+        final userDoc = await transaction.get(userRef);
 
         if (!postDoc.exists) return;
 
@@ -139,6 +173,15 @@ class LikeService {
           // Unlike
           transaction.delete(likeRef);
           transaction.update(postRef, {'likesCount': newLikesCount});
+
+          // Update user's likes count
+          if (userDoc.exists) {
+            final currentLikesCount = userDoc.data()?['likesCount'] ?? 0;
+            if (currentLikesCount > 0) {
+              transaction
+                  .update(userRef, {'likesCount': currentLikesCount - 1});
+            }
+          }
         } else {
           // Like
           transaction.set(likeRef, {
@@ -148,6 +191,12 @@ class LikeService {
             'timestamp': Timestamp.now(),
           });
           transaction.update(postRef, {'likesCount': newLikesCount});
+
+          // Update user's likes count
+          if (userDoc.exists) {
+            final currentLikesCount = userDoc.data()?['likesCount'] ?? 0;
+            transaction.update(userRef, {'likesCount': currentLikesCount + 1});
+          }
         }
       });
     } catch (e) {
@@ -167,6 +216,21 @@ class LikeService {
 
       debugPrint('Error toggling like: $e');
       throw Exception('Failed to toggle like: $e');
+    }
+  }
+
+  // Get total likes count for a user
+  Future<int> getUserTotalLikes(String userId) async {
+    try {
+      final likesSnapshot = await _firestore
+          .collection(_likesCollection)
+          .where('userId', isEqualTo: userId)
+          .count()
+          .get();
+      return likesSnapshot.count ?? 0;
+    } catch (e) {
+      debugPrint('Error getting user total likes: $e');
+      return 0;
     }
   }
 }

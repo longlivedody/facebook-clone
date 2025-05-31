@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:facebook_clone/services/auth_services/auth_service.dart';
 import 'package:facebook_clone/services/post_services/create_post_service.dart';
+import 'package:facebook_clone/widgets/custom_icon_button.dart';
 import 'package:facebook_clone/widgets/custom_text.dart';
 import 'package:facebook_clone/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../consts/theme.dart';
 
 /// A screen that allows users to create a new post with text and optional image.
 class CreatePostScreen extends StatefulWidget {
@@ -104,47 +108,53 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildUserInfo(),
-              const SizedBox(height: 20),
-              _buildPostInput(),
-              const SizedBox(height: 20),
-              if (_postImageBase64 != null) _buildImagePreview(),
-              const SizedBox(height: 20),
-              _buildActionButtons(),
-              if (_errorMessage != null) _buildErrorMessage(),
-            ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
+          child: Form(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    CustomIconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        iconData: Icons.arrow_back_ios),
+                    CustomText(
+                      'Create Post',
+                    ),
+                    Spacer(),
+                    _isLoading
+                        ? Center(child: const CircularProgressIndicator())
+                        : ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    AppTheme.lightTheme.colorScheme.primary,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 20)),
+                            onPressed: _createPost,
+                            child: Text(
+                              'POST',
+                              style: TextStyle(color: Colors.white),
+                            ))
+                  ],
+                ),
+                Divider(),
+                _buildUserInfo(),
+                const SizedBox(height: 5),
+                _buildPostInput(),
+                const SizedBox(height: 20),
+                if (_postImageBase64 != null) _buildImagePreview(),
+                const SizedBox(height: 20),
+                _buildActionButtons(),
+                if (_errorMessage != null) _buildErrorMessage(),
+              ],
+            ),
           ),
         ),
       ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      title: const CustomText('Create Post'),
-      leading: IconButton(
-        icon: const Icon(Icons.close),
-        onPressed: () => Navigator.pop(context),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : _createPost,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Post'),
-        ),
-      ],
     );
   }
 
@@ -168,10 +178,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            CustomText(
-              'Public',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
           ],
         ),
       ],
@@ -180,26 +186,35 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   Widget _buildPostInput() {
     return CustomTextField(
+      decoration: InputDecoration(
+        fillColor: Colors.transparent,
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+        border: OutlineInputBorder(borderSide: BorderSide.none),
+        disabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
+      ),
       controller: _postController,
-      labelText: "What's on your mind?",
-      maxLines: 5,
+      hintText: "What's on your mind?",
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter some text';
         }
+
         return null;
       },
     );
   }
 
   Widget _buildImagePreview() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final estimatedImageHeight = screenWidth * 1.1;
     return Stack(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Image.memory(
             base64Decode(_postImageBase64!),
-            height: 200,
+            height: estimatedImageHeight,
             width: double.infinity,
             fit: BoxFit.cover,
           ),

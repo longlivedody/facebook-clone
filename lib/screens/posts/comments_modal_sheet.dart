@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 import '../../models/comments_model.dart';
-import '../../widgets/custom_text.dart';
 import '../../services/post_services/comment_service.dart';
+import '../../services/auth_services/auth_service.dart';
+import '../../widgets/custom_text.dart';
 import 'likes_screen.dart';
 
 void showCommentsModal({
@@ -13,7 +14,7 @@ void showCommentsModal({
   required Function(String) onCommentSent,
 }) {
   final commentService = CommentService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   showModalBottomSheet<void>(
     context: context,
@@ -24,9 +25,9 @@ void showCommentsModal({
     builder: (BuildContext modalContext) {
       return DraggableScrollableSheet(
         expand: false,
-        initialChildSize: 0.5,
+        initialChildSize: 0.9,
         minChildSize: 0.3,
-        maxChildSize: 0.9,
+        maxChildSize: 1,
         builder: (BuildContext context, ScrollController scrollController) {
           return Container(
             padding: const EdgeInsets.only(top: 12.0),
@@ -46,7 +47,7 @@ void showCommentsModal({
                 ),
                 // Post Stats Header
                 StreamBuilder<DocumentSnapshot>(
-                  stream: _firestore
+                  stream: firestore
                       .collection('posts')
                       .where('postId', isEqualTo: postId)
                       .snapshots()
@@ -181,6 +182,10 @@ void showCommentsModal({
                         itemCount: comments.length,
                         itemBuilder: (BuildContext context, int index) {
                           final CommentsModel currentComment = comments[index];
+                          final currentUser = AuthService().currentUser;
+                          final isCommentOwner =
+                              currentUser?.uid == currentComment.userId;
+
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: 8.0,
@@ -211,19 +216,24 @@ void showCommentsModal({
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      CustomText(
-                                        currentComment.username,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: CustomText(
+                                              currentComment.username,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       const SizedBox(height: 2),
                                       CustomText(
                                         currentComment.comment,
                                         style: const TextStyle(fontSize: 14),
                                       ),
-                                      const SizedBox(height: 4),
                                       CustomText(
                                         _getTimeAgo(currentComment.timestamp),
                                         style: TextStyle(
@@ -234,6 +244,73 @@ void showCommentsModal({
                                     ],
                                   ),
                                 ),
+                                if (isCommentOwner)
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Delete Comment'),
+                                          content: const Text(
+                                              'Are you sure you want to delete this comment?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: const Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () async {
+                                                try {
+                                                  await commentService
+                                                      .deleteComment(
+                                                    postId: postId,
+                                                    userId: currentUser!.uid,
+                                                    timestamp: currentComment
+                                                        .timestamp,
+                                                  );
+                                                  if (context.mounted) {
+                                                    Navigator.pop(context);
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            'Comment deleted successfully'),
+                                                      ),
+                                                    );
+                                                  }
+                                                } catch (e) {
+                                                  if (context.mounted) {
+                                                    Navigator.pop(context);
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                            'Failed to delete comment: ${e.toString()}'),
+                                                        backgroundColor:
+                                                            Colors.red,
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                              child: Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .error,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                               ],
                             ),
                           );

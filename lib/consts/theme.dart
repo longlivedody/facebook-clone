@@ -1,154 +1,199 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  AppTheme._();
+  AppTheme._(); // Private constructor to prevent instantiation
 
-  static final Color _lightPrimaryColor = Colors.blue.shade700;
-  static final Color _lightPrimaryVariantColor = Colors.blue.shade800;
-  static const Color _lightOnPrimaryColor = Colors.white;
-  static final Color _lightSecondaryColor = Colors.lightBlue.shade300;
-  static const Color _lightOnSecondaryColor = Colors.black;
+  // --- Light Theme Colors ---
+  static final Color _lightPrimary = Colors.blue.shade700;
+  static final Color _lightOnPrimary = Colors.white;
+  static final Color _lightPrimaryContainer =
+      Colors.blue.shade100; // Lighter variant for containers
+  static final Color _lightOnPrimaryContainer =
+      Colors.blue.shade900; // For text/icons on primaryContainer
+  static final Color _lightSecondary = Colors.lightBlue.shade300;
+  static final Color _lightOnSecondary = Colors.black;
+  static final Color _lightSurface = Colors.white;
+  static final Color _lightOnSurface = Colors.black;
+  static final Color _lightError = Colors.red.shade700;
+  static final Color _lightOnError = Colors.white;
+  static final Color _lightOutline =
+      Colors.grey.shade400; // For borders, dividers
+  static final Color _lightScafooldBackground =
+      Colors.grey.shade50; // Slightly off-white
 
-  static final Color _darkPrimaryColor = Colors.blue.shade300;
-  static final Color _darkPrimaryVariantColor = Colors.blue.shade700;
-  static const Color _darkOnPrimaryColor = Colors.black;
-  static final Color _darkSecondaryColor = Colors.blue.shade700;
-  static const Color _darkOnSecondaryColor = Colors.white;
+  // --- Dark Theme Colors ---
+  static final Color _darkPrimary = Colors.blue.shade300;
+  static final Color _darkOnPrimary = Colors.black;
+  static final Color _darkPrimaryContainer =
+      Colors.blue.shade700; // Darker variant for containers
+  static final Color _darkOnPrimaryContainer =
+      Colors.blue.shade50; // For text/icons on primaryContainer
+  static final Color _darkSecondary = Colors.blue.shade700;
+  static final Color _darkOnSecondary = Colors.white;
+  static final Color _darkSurface = Colors.grey.shade800;
+  static final Color _darkOnSurface = Colors.white;
+  static final Color _darkError = Colors.redAccent.shade200;
+  static final Color _darkOnError = Colors.black;
+  static final Color _darkOutline =
+      Colors.grey.shade700; // For borders, dividers
+  static final Color _darkScaffoldBackground = Colors.grey.shade900;
 
+  // --- Common Text Styles (can be shared or overridden) ---
+  static const _baseTextStyle =
+      TextStyle(fontFamily: 'YourAppFont'); // Example: Define a base font
+
+  static final TextTheme _lightTextTheme = TextTheme(
+    displayLarge: _baseTextStyle.copyWith(
+        fontSize: 32.0, fontWeight: FontWeight.bold, color: _lightOnSurface),
+    headlineMedium: _baseTextStyle.copyWith(
+        fontSize: 24.0, fontWeight: FontWeight.w600, color: _lightOnSurface),
+    bodyLarge: _baseTextStyle.copyWith(
+        fontSize: 16.0, color: _lightOnSurface.withAlpha((0.87 * 255).round())),
+    // CHANGED
+    bodyMedium: _baseTextStyle.copyWith(
+        fontSize: 14.0, color: _lightOnSurface.withAlpha((0.75 * 255).round())),
+    // CHANGED
+    labelLarge: _baseTextStyle.copyWith(
+        fontSize: 16.0,
+        fontWeight: FontWeight.bold,
+        color: _lightOnPrimary), // For buttons on primary background
+  ).apply(
+    bodyColor: _lightOnSurface, // Default color for text if not specified
+    displayColor: _lightOnSurface, // Default color for display text
+  );
+
+  static final TextTheme _darkTextTheme = TextTheme(
+    displayLarge: _baseTextStyle.copyWith(
+        fontSize: 32.0, fontWeight: FontWeight.bold, color: _darkOnSurface),
+    headlineMedium: _baseTextStyle.copyWith(
+        fontSize: 24.0, fontWeight: FontWeight.w600, color: _darkOnSurface),
+    bodyLarge: _baseTextStyle.copyWith(
+        fontSize: 16.0, color: _darkOnSurface.withAlpha((0.87 * 255).round())),
+    // CHANGED
+    bodyMedium: _baseTextStyle.copyWith(
+        fontSize: 14.0, color: _darkOnSurface.withAlpha((0.75 * 255).round())),
+    // CHANGED
+    labelLarge: _baseTextStyle.copyWith(
+        fontSize: 16.0,
+        fontWeight: FontWeight.bold,
+        color: _darkOnPrimary), // For buttons on primary background
+  ).apply(
+    bodyColor: _darkOnSurface,
+    displayColor: _darkOnSurface,
+  );
+
+  // --- Light Theme Definition ---
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-    // Recommended for new Flutter projects
-    inputDecorationTheme: InputDecorationTheme(
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(color: _lightPrimaryColor),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(color: _lightPrimaryColor, width: 2.0),
-      ),
-      labelStyle: const TextStyle(color: _lightOnSecondaryColor),
-      hintStyle: TextStyle(color: Colors.grey.shade500),
-      // ... other input decoration defaults
-    ),
-    scaffoldBackgroundColor: Colors.white,
-    dividerTheme: DividerThemeData(color: Colors.grey[400], thickness: 2.0),
-    appBarTheme: AppBarTheme(
-      color: _lightPrimaryColor,
-      iconTheme: const IconThemeData(color: _lightOnPrimaryColor),
-      actionsIconTheme: const IconThemeData(color: _lightOnPrimaryColor),
-      titleTextStyle: const TextStyle(
-        color: _lightOnPrimaryColor,
-        fontSize: 20,
-        fontWeight: FontWeight.w500,
-      ),
-    ),
+    brightness: Brightness.light,
     colorScheme: ColorScheme.light(
-      primary: _lightPrimaryColor,
-      onPrimary: _lightOnPrimaryColor,
-      primaryContainer: _lightPrimaryVariantColor,
-      // Or a lighter shade of blue
-      secondary: _lightSecondaryColor,
-      onSecondary: _lightOnSecondaryColor,
-      surface: Colors.white,
-      onSurface: Colors.black,
-      error: Colors.red,
-      onError: Colors.white,
+      primary: _lightPrimary,
+      onPrimary: _lightOnPrimary,
+      primaryContainer: _lightPrimaryContainer,
+      onPrimaryContainer: _lightOnPrimaryContainer,
+      secondary: _lightSecondary,
+      onSecondary: _lightOnSecondary,
+      surface: _lightSurface,
+      onSurface: _lightOnSurface,
+      error: _lightError,
+      onError: _lightOnError,
+      outline: _lightOutline,
     ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _lightPrimaryColor,
-        foregroundColor: _lightOnPrimaryColor,
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
+    scaffoldBackgroundColor: _lightScafooldBackground,
+    appBarTheme: AppBarTheme(
+      color: _lightPrimary,
+      foregroundColor: _lightOnPrimary,
+      elevation: 2.0,
+      titleTextStyle:
+          _lightTextTheme.headlineMedium?.copyWith(color: _lightOnPrimary),
     ),
     textTheme: _lightTextTheme,
-    // Add other theme properties like inputDecorationTheme, cardTheme, etc.
-  );
-
-  static final ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    scaffoldBackgroundColor: Colors.grey.shade900,
-    appBarTheme: AppBarTheme(
-      color: _darkPrimaryColor,
-      iconTheme: const IconThemeData(color: _darkOnPrimaryColor),
-      actionsIconTheme: const IconThemeData(color: Colors.white),
-      titleTextStyle: const TextStyle(
-        color: _darkOnPrimaryColor,
-        fontSize: 20,
-        fontWeight: FontWeight.w500,
-      ),
-    ),
-    colorScheme: ColorScheme.dark(
-      primary: _darkPrimaryColor,
-      onPrimary: _darkOnPrimaryColor,
-      primaryContainer: _darkPrimaryVariantColor,
-      // Or a darker shade of blue
-      secondary: _darkSecondaryColor,
-      onSecondary: _darkOnSecondaryColor,
-      surface: Colors.grey.shade800,
-      onSurface: Colors.white,
-      error: Colors.redAccent,
-      onError: Colors.black,
-    ),
-    dividerTheme: const DividerThemeData(color: Colors.black, thickness: 2.0),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(color: _darkPrimaryColor),
+        borderSide: BorderSide(color: _lightOutline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(color: _darkPrimaryColor, width: 2.0),
+        borderSide: BorderSide(color: _lightPrimary, width: 2.0),
       ),
-      labelStyle: const TextStyle(color: Colors.white),
-      hintStyle: TextStyle(color: Colors.grey.shade700),
-      filled: true,
-      fillColor: Colors.grey.shade800.withAlpha(50),
-      // ... other input decoration defaults
+      labelStyle: _lightTextTheme.bodyMedium
+          ?.copyWith(color: _lightOnSurface.withAlpha((0.6 * 255).round())),
+      // CHANGED
+      hintStyle: _lightTextTheme.bodyMedium
+          ?.copyWith(color: _lightOnSurface.withAlpha((0.5 * 255).round())),
+      // CHANGED
+      filled: false,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _darkPrimaryColor,
-        foregroundColor: _darkOnPrimaryColor,
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        backgroundColor: _lightPrimary,
+        foregroundColor: _lightOnPrimary,
+        textStyle: _lightTextTheme.labelLarge,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 2.0,
       ),
     ),
+    dividerTheme: DividerThemeData(color: _lightOutline, thickness: 1.0),
+  );
+
+  // --- Dark Theme Definition ---
+  static final ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.dark(
+      primary: _darkPrimary,
+      onPrimary: _darkOnPrimary,
+      primaryContainer: _darkPrimaryContainer,
+      onPrimaryContainer: _darkOnPrimaryContainer,
+      secondary: _darkSecondary,
+      onSecondary: _darkOnSecondary,
+      surface: _darkSurface,
+      onSurface: _darkOnSurface,
+      error: _darkError,
+      onError: _darkOnError,
+      outline: _darkOutline,
+    ),
+    scaffoldBackgroundColor: _darkScaffoldBackground,
+    appBarTheme: AppBarTheme(
+      color: _darkSurface,
+      foregroundColor: _darkOnSurface,
+      elevation: 0,
+      titleTextStyle:
+          _darkTextTheme.headlineMedium?.copyWith(color: _darkOnSurface),
+    ),
     textTheme: _darkTextTheme,
-    // Add other theme properties
-  );
-
-  static const TextTheme _lightTextTheme = TextTheme(
-    displayLarge: TextStyle(
-      fontSize: 32.0,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide(color: _darkOutline),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide(color: _darkPrimary, width: 2.0),
+      ),
+      labelStyle: _darkTextTheme.bodyMedium
+          ?.copyWith(color: _darkOnSurface.withAlpha((0.6 * 255).round())),
+      // CHANGED
+      hintStyle: _darkTextTheme.bodyMedium
+          ?.copyWith(color: _darkOnSurface.withAlpha((0.5 * 255).round())),
+      // CHANGED
+      filled: true,
+      fillColor: _darkSurface
+          .withBlue(((_darkSurface.b * 255.0).round() + 10).clamp(0, 255))
+          .withAlpha(15),
     ),
-    bodyLarge: TextStyle(fontSize: 16.0, color: Colors.black87),
-    labelLarge: TextStyle(
-      fontSize: 16.0,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    ), // For buttons
-    // Define other text styles
-  );
-
-  static const TextTheme _darkTextTheme = TextTheme(
-    displayLarge: TextStyle(
-      fontSize: 32.0,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _darkPrimary,
+        foregroundColor: _darkOnPrimary,
+        textStyle: _darkTextTheme.labelLarge,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 2.0,
+      ),
     ),
-    bodyLarge: TextStyle(fontSize: 16.0, color: Colors.white70),
-    labelLarge: TextStyle(
-      fontSize: 16.0,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
-    ), // For buttons
-    // Define other text styles
+    dividerTheme: DividerThemeData(color: _darkOutline, thickness: 1.0),
   );
 }
