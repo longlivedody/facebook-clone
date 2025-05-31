@@ -200,6 +200,7 @@ class PostService {
         // Finally update user's posts count
         final userRef = _firestore.collection('users').doc(userId);
         await userRef.update({'postsCount': FieldValue.increment(-1)});
+        await userRef.update({'likesCount': FieldValue.increment(-1)});
 
         return;
       } catch (e) {

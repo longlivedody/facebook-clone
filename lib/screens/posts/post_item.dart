@@ -8,6 +8,7 @@ import '../../utils/image_utils.dart';
 import '../../widgets/custom_text.dart';
 import 'comments_modal_sheet.dart';
 import 'package:facebook_clone/services/post_services/create_post_service.dart';
+import 'update_post_screen.dart';
 
 /// A widget that displays a single post item with its content, interactions, and metadata.
 class PostItem extends StatefulWidget {
@@ -136,20 +137,11 @@ class _PostItemState extends State<PostItem> {
 
   /// Handles the update of the post
   void _handleUpdatePost() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Update Post'),
-          content: const Text('Post update functionality coming soon!'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdatePostScreen(post: widget.postData),
+      ),
     );
   }
 
