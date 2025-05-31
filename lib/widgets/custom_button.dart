@@ -18,53 +18,42 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle? themeButtonStyle = Theme.of(
-      context,
-    ).elevatedButtonTheme.style;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final ButtonStyle? themeButtonStyle = theme.elevatedButtonTheme.style;
 
     final ButtonStyle componentDefaultStyle = ButtonStyle(
-      backgroundColor: WidgetStateProperty.resolveWith<Color?>((
-        Set<WidgetState> states,
-      ) {
-        if (states.contains(WidgetState.pressed)) {
-          return colorScheme.primary.withAlpha(
-            80,
-          ); // Use primary color from theme
-        } else if (states.contains(WidgetState.disabled)) {
-          return colorScheme.onSurface.withAlpha(12);
+      backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(MaterialState.pressed)) {
+          return colorScheme.primary.withOpacity(0.8);
+        } else if (states.contains(MaterialState.disabled)) {
+          return colorScheme.onSurface.withOpacity(0.12);
         }
         return colorScheme.primary;
       }),
-      foregroundColor: WidgetStateProperty.resolveWith<Color?>((
-        Set<WidgetState> states,
-      ) {
-        if (states.contains(WidgetState.disabled)) {
-          return colorScheme.onSurface.withAlpha(38);
+      foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(MaterialState.disabled)) {
+          return colorScheme.onSurface.withOpacity(0.38);
         }
         return colorScheme.onPrimary;
       }),
-      padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
-        EdgeInsets.symmetric(vertical: 14.0, horizontal: 20.0),
+      padding: const MaterialStatePropertyAll<EdgeInsetsGeometry>(
+        EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
       ),
-      textStyle: WidgetStatePropertyAll<TextStyle?>(
-        Theme.of(
-          context,
-        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+      textStyle: MaterialStatePropertyAll<TextStyle?>(
+        theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w500),
       ),
-      shape: WidgetStatePropertyAll<OutlinedBorder>(
+      shape: MaterialStatePropertyAll<OutlinedBorder>(
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       ),
-      elevation: WidgetStateProperty.resolveWith<double?>((
-        Set<WidgetState> states,
-      ) {
-        if (states.contains(WidgetState.pressed)) return 2.0;
-        if (states.contains(WidgetState.disabled)) return 0.0;
-        return 4.0; // Default elevation
+      elevation: MaterialStateProperty.resolveWith<double?>((states) {
+        if (states.contains(MaterialState.pressed)) return 2.0;
+        if (states.contains(MaterialState.disabled)) return 0.0;
+        return 2.0;
       }),
-      // Ensure the button itself can expand
-      minimumSize: const WidgetStatePropertyAll<Size>(Size(double.infinity, 0)),
+      minimumSize:
+          const MaterialStatePropertyAll<Size>(Size(double.infinity, 48)),
     );
 
     final ButtonStyle effectiveStyle = (themeButtonStyle ?? const ButtonStyle())
@@ -73,24 +62,22 @@ class CustomButton extends StatelessWidget {
 
     TextStyle? labelTextStyle = textStyle;
     if (labelTextStyle == null) {
-      final WidgetStateProperty<TextStyle?>? styleTextStyleProp =
+      final MaterialStateProperty<TextStyle?>? styleTextStyleProp =
           effectiveStyle.textStyle;
-      if (styleTextStyleProp is WidgetStatePropertyAll<TextStyle?>) {
+      if (styleTextStyleProp is MaterialStatePropertyAll<TextStyle?>) {
         labelTextStyle = styleTextStyleProp.value;
       } else if (styleTextStyleProp != null) {
         labelTextStyle = styleTextStyleProp.resolve({});
       }
     }
 
-    labelTextStyle ??= Theme.of(context).textTheme.labelLarge;
+    labelTextStyle ??= theme.textTheme.labelLarge;
 
     return ElevatedButton(
       onPressed: onPressed,
       style: effectiveStyle,
       child: Row(
-        // Make the Row take full width
         mainAxisSize: MainAxisSize.max,
-        // Center the content within the Row
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (icon != null) ...[

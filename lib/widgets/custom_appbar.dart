@@ -8,22 +8,28 @@ class CustomAppbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Row(
       children: [
-        const CustomText(
+        CustomText(
           'facebook',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const Spacer(),
         CustomIconButton(
           onPressed: () {},
           iconData: Icons.search,
-          iconSize: 30,
+          iconSize: 24,
         ),
+        const SizedBox(width: 8),
         CustomIconButton(
           onPressed: () {},
           iconData: Icons.message,
-          iconSize: 30,
+          iconSize: 24,
         ),
       ],
     );

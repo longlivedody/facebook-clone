@@ -20,14 +20,14 @@ class CustomText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle? defaultThemeStyle = Theme.of(context).textTheme.bodyLarge;
+    final theme = Theme.of(context);
+    final defaultStyle = theme.textTheme.bodyLarge;
 
-    final TextStyle effectiveTextStyle =
-        (defaultThemeStyle ?? const TextStyle()).merge(style);
+    final effectiveStyle = (defaultStyle ?? const TextStyle()).merge(style);
 
     return Text(
       text,
-      style: effectiveTextStyle,
+      style: effectiveStyle,
       textAlign: textAlign,
       overflow: overflow,
       maxLines: maxLines,

@@ -52,32 +52,32 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final InputDecorationTheme themeInputDecorationTheme = Theme.of(
-      context,
-    ).inputDecorationTheme;
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final InputDecorationTheme themeInputDecorationTheme =
+        theme.inputDecorationTheme;
 
     final InputDecoration componentDefaultDecoration = InputDecoration(
       labelText: labelText,
       hintText: hintText,
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-      prefixIconColor: WidgetStateColor.resolveWith((states) {
-        if (states.contains(WidgetState.focused)) {
+      prefixIconColor: MaterialStateColor.resolveWith((states) {
+        if (states.contains(MaterialState.focused)) {
           return colorScheme.primary;
         }
-        if (states.contains(WidgetState.error)) {
+        if (states.contains(MaterialState.error)) {
           return colorScheme.error;
         }
         return colorScheme.onSurfaceVariant;
       }),
-      suffixIconColor: WidgetStateColor.resolveWith((states) {
-        // For Material 3
-        if (states.contains(WidgetState.focused)) {
+      suffixIconColor: MaterialStateColor.resolveWith((states) {
+        if (states.contains(MaterialState.focused)) {
           return colorScheme.primary;
         }
-        if (states.contains(WidgetState.error)) {
+        if (states.contains(MaterialState.error)) {
           return colorScheme.error;
         }
         return colorScheme.onSurfaceVariant;
@@ -99,7 +99,7 @@ class CustomTextField extends StatelessWidget {
                   : null,
             );
 
-    final TextStyle? themeTextStyle = Theme.of(context).textTheme.titleMedium;
+    final TextStyle? themeTextStyle = theme.textTheme.bodyLarge;
     final TextStyle effectiveTextStyle =
         (themeTextStyle ?? const TextStyle()).merge(style);
 
@@ -119,7 +119,7 @@ class CustomTextField extends StatelessWidget {
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
       enabled: enabled,
-      style: effectiveTextStyle, // Apply the determined text style
+      style: effectiveTextStyle,
     );
   }
 }

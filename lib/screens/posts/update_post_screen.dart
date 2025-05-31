@@ -1,4 +1,5 @@
 import 'package:facebook_clone/widgets/custom_icon_button.dart';
+import 'package:facebook_clone/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:facebook_clone/models/post_data_model.dart';
 import 'package:facebook_clone/services/post_services/create_post_service.dart';
@@ -113,7 +114,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Row(
                 children: [
@@ -138,50 +139,14 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                   ),
                 ],
               ),
+              Divider(),
               SizedBox(
                 height: 5,
               ),
-              TextField(
-                controller: _textController,
-                maxLines: 5,
-                decoration: const InputDecoration(
-                  hintText: "What's on your mind?",
-                  border: OutlineInputBorder(),
-                ),
-              ),
+              _buildPostInput(),
               const SizedBox(height: 16),
               if (_imageUrl != null || _newImage != null)
-                if (_imageUrl != '')
-                  Stack(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          image: DecorationImage(
-                            image: _newImage != null
-                                ? FileImage(_newImage!)
-                                : ImageUtils.getImageProvider(_imageUrl!),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.white),
-                          onPressed: () {
-                            setState(() {
-                              _imageUrl = null;
-                              _newImage = null;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                if (_imageUrl != '') _buildPostImage(),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _pickImage,
@@ -192,6 +157,72 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPostImage() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final estimatedImageHeight = screenWidth * 1.1;
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image(
+            image: _newImage != null
+                ? FileImage(_newImage!)
+                : ImageUtils.getImageProvider(_imageUrl!),
+            width: double.infinity,
+            fit: BoxFit.cover,
+            height: estimatedImageHeight,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: double.infinity,
+                height: estimatedImageHeight,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.error_outline,
+                  size: 50,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              );
+            },
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IconButton(
+            icon: const Icon(Icons.delete, color: Colors.white),
+            onPressed: () {
+              setState(() {
+                _imageUrl = null;
+                _newImage = null;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPostInput() {
+    return CustomTextField(
+      decoration: InputDecoration(
+        fillColor: Colors.transparent,
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+        border: OutlineInputBorder(borderSide: BorderSide.none),
+        disabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
+      ),
+      controller: _textController,
+      hintText: "What's on your mind?",
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+
+        return null;
+      },
     );
   }
 }
